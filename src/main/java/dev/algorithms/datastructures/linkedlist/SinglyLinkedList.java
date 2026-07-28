@@ -22,4 +22,30 @@ public class SinglyLinkedList<E> {
             this.next = next;
         }
     }
+
+    private Node<E> head = null;
+    private Node<E> tail = null;
+
+
+    // TODO: add constructor
+    // TODO: addFirst
+    // TODO: removeFirst
+
+    private int size = 0;
+
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    public E first() {
+        return head.getElement();
+    }
+
+    public E last() {
+        return tail.getElement();
+    }
 }
