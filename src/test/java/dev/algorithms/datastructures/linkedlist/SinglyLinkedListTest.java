@@ -49,51 +49,46 @@ class SinglyLinkedListTest {
         assertEquals("second", list.last());
     }
 
-//    @Test
-//    void addFirstAndAddLastMaintainHeadAndTail() {
-//        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
-//
-//        list.addFirst(2);
-//        list.addLast(3);
-//        list.addFirst(1);
-//
-//        assertEquals(3, list.size());
-//        assertEquals(1, list.first());
-//        assertEquals(3, list.last());
-//    }
-//
-//    @Test
-//    void removeFirstRemovesElementsFromHead() {
-//        SinglyLinkedList<String> list = new SinglyLinkedList<>();
-//        list.addLast("first");
-//        list.addLast("second");
-//        list.addLast("third");
-//
-//        assertEquals("first", list.removeFirst());
-//        assertEquals("second", list.first());
-//        assertEquals("third", list.last());
-//        assertEquals(2, list.size());
-//    }
-//
-//    @Test
-//    void removeFirstReturnsNullWhenEmpty() {
-//        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
-//
-//        assertNull(list.removeFirst());
-//        assertTrue(list.isEmpty());
-//        assertEquals(0, list.size());
-//    }
-//
-//    @Test
-//    void removeFirstClearsTailWhenLastElementIsRemoved() {
-//        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
-//        list.addLast(1);
-//
-//        assertEquals(1, list.removeFirst());
-//
-//        assertTrue(list.isEmpty());
-//        assertEquals(0, list.size());
-//        assertNull(list.first());
-//        assertNull(list.last());
-//    }
+    @Test()
+    void removeFirstReturnsNullWhenIsEmpty() {
+        SinglyLinkedList<String> list = new SinglyLinkedList<>();
+        assertNull(list.removeFirst());
+    }
+
+    @Test
+    void removeFirstRemovesElementsFromHead() {
+        SinglyLinkedList<String> list = new SinglyLinkedList<>();
+        list.addLast("first");
+        list.addLast("second");
+        list.addLast("third");
+
+        assertEquals("first", list.removeFirst());
+        assertEquals("second", list.first());
+        assertEquals("third", list.last());
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    void removeFirstClearsTailAndHeadWhenRemoveLastElement() {
+        SinglyLinkedList<String> list = new SinglyLinkedList<>();
+        list.addLast("first");
+
+        assertEquals("first", list.removeFirst());
+        assertNull(list.last());
+        assertNull(list.first());
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    void addFirstAndAddLastMaintainHeadAndTail() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+
+        list.addFirst(2);
+        list.addLast(3);
+        list.addFirst(1);
+
+        assertEquals(1, list.first());
+        assertEquals(3, list.last());
+        assertEquals(3, list.size());
+    }
 }
