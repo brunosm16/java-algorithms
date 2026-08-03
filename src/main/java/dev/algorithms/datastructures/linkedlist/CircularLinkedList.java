@@ -45,7 +45,7 @@ public class CircularLinkedList<E> {
     }
 
     public E last() {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return null;
         }
         return tail.getElement();
@@ -71,5 +71,22 @@ public class CircularLinkedList<E> {
     public void addLast(E element) {
         addFirst(element);
         tail = tail.getNext();
+    }
+
+    public E removeFirst() {
+        if (isEmpty()) {
+            return null;
+        }
+
+        Node<E> currentHead = tail.getNext();
+
+        if (currentHead == tail) {
+            tail = null;
+        } else {
+            tail.setNext(currentHead.getNext());
+        }
+        size--;
+
+        return currentHead.getElement();
     }
 }

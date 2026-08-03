@@ -93,4 +93,37 @@ class CircularLinkedListTest {
         assertEquals("GIG", list.last());
         assertEquals(5, list.size());
     }
+
+    @Test
+    void returnsNullOnRemoveFirstWhenListItsEmpty() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        assertNull(list.removeFirst());
+    }
+
+    @Test
+    void removeLFirstElementFromListWithMultipleElements() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        list.addLast("FOR");
+        list.addLast("GRU");
+        list.addLast("CGH");
+
+        list.removeFirst();
+
+        assertEquals(2, list.size());
+        assertEquals("GRU", list.first());
+    }
+
+    @Test
+    void removeLFirstElementFromListWhenListGetsEmpty() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        list.addLast("FOR");
+
+        list.removeFirst();
+
+        assertEquals(0, list.size());
+        assertNull(list.first());
+    }
 }
