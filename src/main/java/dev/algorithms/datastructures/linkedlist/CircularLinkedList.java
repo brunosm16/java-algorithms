@@ -38,14 +38,21 @@ public class CircularLinkedList<E> {
     }
 
     public E first() {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return null;
         }
         return tail.getNext().getElement();
     }
 
-    public void addFirst(E element) {
+    public E last() {
         if(isEmpty()) {
+            return null;
+        }
+        return tail.getElement();
+    }
+
+    public void addFirst(E element) {
+        if (isEmpty()) {
             tail = new Node<>(element, null);
             tail.setNext(tail);
         } else {
@@ -56,8 +63,13 @@ public class CircularLinkedList<E> {
     }
 
     public void rotate() {
-        if(!isEmpty()) {
+        if (!isEmpty()) {
             tail = tail.getNext();
         }
+    }
+
+    public void addLast(E element) {
+        addFirst(element);
+        tail = tail.getNext();
     }
 }

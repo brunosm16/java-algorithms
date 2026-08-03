@@ -61,4 +61,33 @@ class CircularLinkedListTest {
 
         assertEquals("GRU", list.first());
     }
+
+    @Test
+    void addLastElementWhenListItsEmpty() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        list.addLast("FOR");
+        assertEquals("FOR", list.first());
+    }
+
+    @Test
+    void addLastElementWhenListHasOneElement() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        list.addLast("FOR");
+        list.addLast("GRU");
+        assertEquals("GRU", list.last());
+    }
+
+    @Test
+    void addLastElementWhenListHasMultipleElements() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        list.addLast("FOR");
+        list.addLast("GRU");
+        list.addLast("CGH");
+        list.addLast("VCP");
+        list.addLast("GIG");
+        assertEquals("GIG", list.last());
+    }
 }
