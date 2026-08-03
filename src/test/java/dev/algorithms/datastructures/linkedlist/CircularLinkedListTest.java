@@ -46,4 +46,19 @@ class CircularLinkedListTest {
         assertEquals("CGH", list.first());
         assertEquals(3, list.size());
     }
+
+    @Test
+    void shouldMoveHeadToNextElementWhenRotated() {
+        CircularLinkedList<String> list = new CircularLinkedList<>();
+
+        list.addFirst("FOR");
+        list.addFirst("GRU");
+        list.addFirst("CGH");
+
+        assertEquals("CGH", list.first());
+
+        list.rotate();
+
+        assertEquals("GRU", list.first());
+    }
 }

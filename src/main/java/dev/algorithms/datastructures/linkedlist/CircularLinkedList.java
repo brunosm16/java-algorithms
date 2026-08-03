@@ -54,4 +54,10 @@ public class CircularLinkedList<E> {
         }
         size++;
     }
+
+    public void rotate() {
+        if(!isEmpty()) {
+            tail = tail.getNext();
+        }
+    }
 }
