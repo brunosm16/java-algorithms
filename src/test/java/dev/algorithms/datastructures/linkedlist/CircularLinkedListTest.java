@@ -68,6 +68,7 @@ class CircularLinkedListTest {
 
         list.addLast("FOR");
         assertEquals("FOR", list.first());
+        assertEquals(1, list.size());
     }
 
     @Test
@@ -77,6 +78,7 @@ class CircularLinkedListTest {
         list.addLast("FOR");
         list.addLast("GRU");
         assertEquals("GRU", list.last());
+        assertEquals(2, list.size());
     }
 
     @Test
@@ -89,5 +91,6 @@ class CircularLinkedListTest {
         list.addLast("VCP");
         list.addLast("GIG");
         assertEquals("GIG", list.last());
+        assertEquals(5, list.size());
     }
 }
