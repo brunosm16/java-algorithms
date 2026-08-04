@@ -33,8 +33,8 @@ public class DoublyLinkedList<E> {
         }
     }
 
-    private Node<E> header;
-    private Node<E> trailer;
+    private final Node<E> header;
+    private final Node<E> trailer;
     private int size = 0;
 
     public DoublyLinkedList() {
@@ -59,7 +59,7 @@ public class DoublyLinkedList<E> {
     }
 
     public E last() {
-        if(isEmpty()) {
+        if (isEmpty()) {
             return null;
         }
 
@@ -80,5 +80,28 @@ public class DoublyLinkedList<E> {
         predecessor.setNext(newest);
         successor.setPrev(newest);
         size++;
+    }
+
+    public E removeFirst() {
+        if (isEmpty()) {
+            return null;
+        }
+        return remove(header.getNext());
+    }
+
+    public E removeLast() {
+        if (isEmpty()) {
+            return null;
+        }
+        return remove(trailer.getPrev());
+    }
+
+    private E remove(Node<E> node) {
+        Node<E> predecessor = node.getPrev();
+        Node<E> successor = node.getNext();
+        predecessor.setNext(successor);
+        successor.setPrev(predecessor);
+        size--;
+        return node.getElement();
     }
 }
