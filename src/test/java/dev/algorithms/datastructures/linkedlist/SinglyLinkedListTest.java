@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -204,5 +205,46 @@ class SinglyLinkedListTest {
         assertEquals(first, second);
         assertEquals(second, third);
         assertEquals(first, third);
+    }
+
+    @Test
+    void cloneReturnsEqualButDifferentList() throws CloneNotSupportedException {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        list.addLast(1);
+        list.addLast(2);
+        list.addLast(3);
+
+        SinglyLinkedList<?> clone = (SinglyLinkedList<?>) list.clone();
+
+        assertNotSame(list, clone);
+        assertEquals(list, clone);
+    }
+
+    @Test
+    void cloneCopiesEmptyList() throws CloneNotSupportedException {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+
+        SinglyLinkedList<?> clone = (SinglyLinkedList<?>) list.clone();
+
+        assertNotSame(list, clone);
+        assertTrue(clone.isEmpty());
+        assertEquals(0, clone.size());
+        assertNull(clone.first());
+        assertNull(clone.last());
+    }
+
+    @Test
+    void cloneDoesNotShareNodesWithOriginal() throws CloneNotSupportedException {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        list.addLast(1);
+        list.addLast(2);
+        list.addLast(3);
+
+        SinglyLinkedList<?> clone = (SinglyLinkedList<?>) list.clone();
+        list.addLast(4);
+
+        assertEquals(3, clone.last());
+        assertEquals(1, clone.removeFirst());
+        assertEquals(4, list.last());
     }
 }
