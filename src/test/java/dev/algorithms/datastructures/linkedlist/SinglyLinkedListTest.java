@@ -133,7 +133,7 @@ class SinglyLinkedListTest {
         SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
 
         // Treatment of null
-        assertFalse(list.equals(null));
+        assertNotEquals(null, list);
     }
 
     @Test
