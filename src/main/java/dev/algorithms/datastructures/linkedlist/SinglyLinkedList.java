@@ -1,5 +1,6 @@
 package dev.algorithms.datastructures.linkedlist;
 
+@SuppressWarnings("rawtypes")
 public class SinglyLinkedList<E> {
     private static class Node<E> {
         private final E element;
@@ -85,9 +86,40 @@ public class SinglyLinkedList<E> {
         head = head.getNext();
         size--;
 
-        if(size == 0) {
+        if (size == 0) {
             tail = null;
         }
         return current;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        SinglyLinkedList other = (SinglyLinkedList) obj;
+
+        if (size != other.size()) {
+            return false;
+        }
+
+        Node rootWalk = this.head;
+        Node otherWalk = other.head;
+
+        while (rootWalk != null) {
+            if (!rootWalk.getElement().equals(otherWalk.getElement())) {
+                return false;
+            }
+
+            rootWalk = rootWalk.getNext();
+            otherWalk = otherWalk.getNext();
+        }
+
+        return true;
     }
 }

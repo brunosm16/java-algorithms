@@ -3,6 +3,8 @@ package dev.algorithms.datastructures.linkedlist;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -90,5 +92,117 @@ class SinglyLinkedListTest {
         assertEquals(1, list.first());
         assertEquals(3, list.last());
         assertEquals(3, list.size());
+    }
+
+    @Test
+    void equalsReturnsTrueForSameElementsInSameOrder() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> other = new SinglyLinkedList<>();
+
+        list.addLast(1);
+        list.addLast(2);
+        list.addLast(3);
+        other.addLast(1);
+        other.addLast(2);
+        other.addLast(3);
+
+        // Symmetry
+        assertEquals(list, other);
+        assertEquals(other, list);
+    }
+
+    @Test
+    void equalsReturnsTrueForEmptyLists() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> other = new SinglyLinkedList<>();
+
+        assertEquals(list, other);
+    }
+
+    @Test
+    void equalsReturnsTrueForSameInstance() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        list.addLast(1);
+
+        // Reflexivity
+        assertEquals(list, list);
+    }
+
+    @Test
+    void equalsReturnsFalseForNull() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+
+        // Treatment of null
+        assertFalse(list.equals(null));
+    }
+
+    @Test
+    void equalsReturnsFalseForDifferentType() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+
+        assertNotEquals("not a list", list);
+    }
+
+    @Test
+    void equalsReturnsFalseWhenSizesAreDifferent() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> other = new SinglyLinkedList<>();
+
+        list.addLast(1);
+        list.addLast(2);
+        other.addLast(1);
+
+        assertNotEquals(list, other);
+    }
+
+    @Test
+    void equalsReturnsFalseWhenElementsDiffer() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> other = new SinglyLinkedList<>();
+
+        list.addLast(1);
+        list.addLast(2);
+        list.addLast(3);
+        other.addLast(1);
+        other.addLast(4);
+        other.addLast(3);
+
+        assertNotEquals(list, other);
+    }
+
+    @Test
+    void equalsReturnsFalseWhenElementOrderDiffers() {
+        SinglyLinkedList<Integer> list = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> other = new SinglyLinkedList<>();
+
+        list.addLast(1);
+        list.addLast(2);
+        list.addLast(3);
+        other.addLast(3);
+        other.addLast(2);
+        other.addLast(1);
+
+        assertNotEquals(list, other);
+    }
+
+    @Test
+    void equalsIsTransitive() {
+        SinglyLinkedList<Integer> first = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> second = new SinglyLinkedList<>();
+        SinglyLinkedList<Integer> third = new SinglyLinkedList<>();
+
+        first.addLast(1);
+        first.addLast(2);
+        first.addLast(3);
+        second.addLast(1);
+        second.addLast(2);
+        second.addLast(3);
+        third.addLast(1);
+        third.addLast(2);
+        third.addLast(3);
+
+        assertEquals(first, second);
+        assertEquals(second, third);
+        assertEquals(first, third);
     }
 }
