@@ -1,4 +1,4 @@
-package dev.algorithms.datastructures.linkedlist;
+package dev.datastructures.linkedlist;
 
 @SuppressWarnings("rawtypes")
 public class SinglyLinkedList<E> implements Cloneable {
@@ -126,6 +126,10 @@ public class SinglyLinkedList<E> implements Cloneable {
     @Override
     protected Object clone() throws CloneNotSupportedException {
         SinglyLinkedList other = (SinglyLinkedList) super.clone();
+
+        if(size == 0) {
+            return other;
+        }
 
         Node<E> walkRootNode = head;
         Node<E> otherNode = new Node<>(head.getElement(), null);

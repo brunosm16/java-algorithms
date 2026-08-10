@@ -1,5 +1,6 @@
-package dev.algorithms.datastructures.linkedlist;
+package dev.datastructures.linkedlist;
 
+import dev.datastructures.linkedlist.SinglyLinkedList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,4 +1,4 @@
-package dev.algorithms.datastructures.linkedlist;
+package dev.datastructures.linkedlist;
 
 public class CircularLinkedList<E> {
     private static class Node<E> {
