@@ -40,4 +40,39 @@ class BinarySearchTest {
 
         assertFalse(BinarySearch.binarySearch(data, 1));
     }
+
+    @Test
+    void iterativeReturnsTrueWhenTargetIsFirstElement() {
+        int[] data = {1, 3, 5, 7, 9};
+
+        assertTrue(BinarySearch.binarySearchIterative(data, 1));
+    }
+
+    @Test
+    void iterativeReturnsTrueWhenTargetIsMiddleElement() {
+        int[] data = {1, 3, 5, 7, 9};
+
+        assertTrue(BinarySearch.binarySearchIterative(data, 5));
+    }
+
+    @Test
+    void iterativeReturnsTrueWhenTargetIsLastElement() {
+        int[] data = {1, 3, 5, 7, 9};
+
+        assertTrue(BinarySearch.binarySearchIterative(data, 9));
+    }
+
+    @Test
+    void iterativeReturnsFalseWhenTargetIsNotPresent() {
+        int[] data = {1, 3, 5, 7, 9};
+
+        assertFalse(BinarySearch.binarySearchIterative(data, 4));
+    }
+
+    @Test
+    void iterativeReturnsFalseForEmptyArray() {
+        int[] data = {};
+
+        assertFalse(BinarySearch.binarySearchIterative(data, 1));
+    }
 }

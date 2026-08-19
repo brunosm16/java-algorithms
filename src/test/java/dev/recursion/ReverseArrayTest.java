@@ -49,4 +49,40 @@ class ReverseArrayTest {
 
         assertArrayEquals(new int[]{1, 4, 3, 2, 5}, values);
     }
+
+    @Test
+    void iterativeReversesArrayWithEvenNumberOfElements() {
+        int[] values = {1, 2, 3, 4};
+
+        ReverseArray.reverseArrayIterative(values);
+
+        assertArrayEquals(new int[]{4, 3, 2, 1}, values);
+    }
+
+    @Test
+    void iterativeReversesArrayWithOddNumberOfElements() {
+        int[] values = {1, 2, 3, 4, 5};
+
+        ReverseArray.reverseArrayIterative(values);
+
+        assertArrayEquals(new int[]{5, 4, 3, 2, 1}, values);
+    }
+
+    @Test
+    void iterativeLeavesSingleElementArrayUnchanged() {
+        int[] values = {1};
+
+        ReverseArray.reverseArrayIterative(values);
+
+        assertArrayEquals(new int[]{1}, values);
+    }
+
+    @Test
+    void iterativeLeavesEmptyArrayUnchanged() {
+        int[] values = {};
+
+        ReverseArray.reverseArrayIterative(values);
+
+        assertArrayEquals(new int[]{}, values);
+    }
 }
