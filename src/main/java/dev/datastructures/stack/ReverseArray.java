@@ -1,6 +1,6 @@
 package dev.datastructures.stack;
 
-public class StackAlgorithms {
+public class ReverseArray {
     public static <E> void reverseArray(E[] arr) {
         LinkedStack<E> buffer = new LinkedStack<>();
 
