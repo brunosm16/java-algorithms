@@ -72,15 +72,31 @@ class ArrayListTest {
     }
 
     @Test
-    void addRejectsElementsBeyondConfiguredCapacity() {
+    void addResizesBeyondConfiguredCapacity() {
         ArrayList<Integer> list = new ArrayList<>(2);
         list.add(0, 1);
         list.add(1, 2);
 
-        assertThrows(IndexOutOfBoundsException.class, () -> list.add(2, 3));
-        assertEquals(2, list.size());
+        list.add(2, 3);
+
+        assertEquals(3, list.size());
         assertEquals(1, list.get(0));
         assertEquals(2, list.get(1));
+        assertEquals(3, list.get(2));
+    }
+
+    @Test
+    void addResizesAndStillSupportsMiddleInsertion() {
+        ArrayList<Integer> list = new ArrayList<>(1);
+        list.add(0, 1);
+        list.add(1, 3);
+
+        list.add(1, 2);
+
+        assertEquals(3, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(2, list.get(1));
+        assertEquals(3, list.get(2));
     }
 
     @Test

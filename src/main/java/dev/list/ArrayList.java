@@ -3,7 +3,7 @@ package dev.list;
 public class ArrayList<E> implements List<E> {
     public static final int CAPACITY = 16;
 
-    private final E[] data;
+    private E[] data;
 
     private int size = 0;
 
@@ -85,7 +85,18 @@ public class ArrayList<E> implements List<E> {
 
     private void validateMaxCapacity() throws IndexOutOfBoundsException {
         if (size == data.length) {
-            throw new IndexOutOfBoundsException("Array has reached maximum capacity");
+            resize(data.length * 2);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void resize(int capacity) {
+        E[] temp = (E[]) new Object[capacity];
+
+        for (int i = 0; i < size; i++) {
+            temp[i] = data[i];
+        }
+
+        data = temp;
     }
 }
