@@ -16,7 +16,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
         @Override
         public E getElement() throws IllegalStateException {
-            if(next == null) {
+            if (next == null) {
                 throw new IllegalStateException("Position no longer valid");
             }
 
@@ -42,6 +42,18 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         public void setNext(Node<E> next) {
             this.next = next;
         }
+    }
+
+    private Node<E> header;
+
+    private Node<E> trailer;
+
+    private int size = 0;
+
+    public LinkedPositionalList() {
+        header = new Node<>(null, null, null);
+        trailer = new Node<>(null, header, null);
+        header.setNext(trailer);
     }
 
     @Override
