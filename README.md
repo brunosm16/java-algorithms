@@ -13,10 +13,14 @@ Small, focused Java implementations of common data structures and algorithms.
 src/main/java/dev/algorithms
   algorithms/      Algorithm implementations
   datastructures/  Data structure implementations
+  leetcode/        LeetCode challenge implementations
 
 src/test/java/dev/algorithms
   algorithms/      Algorithm tests
   datastructures/  Data structure tests
+
+docs/leetcode
+  Markdown documentation for LeetCode challenge solutions
 ```
 
 ## Run Tests

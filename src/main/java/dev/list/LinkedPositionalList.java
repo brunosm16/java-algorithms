@@ -56,6 +56,16 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         header.setNext(trailer);
     }
 
+    private Node<E> getNodeFromPosition(Position<E> p) throws IllegalArgumentException {
+        if (!(p instanceof Node<E> node)) throw new IllegalArgumentException("Invalid position p");
+
+        if(node.getNext() == null) {
+            throw new IllegalArgumentException("Position p is no longer a valid position");
+        }
+
+        return node;
+    }
+
     @Override
     public int size() {
         return 0;
