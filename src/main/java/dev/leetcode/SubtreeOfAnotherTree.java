@@ -20,6 +20,12 @@ public class SubtreeOfAnotherTree {
         }
     }
 
+    /**
+     * Depth First Search Solution
+     * Time Complexity: O(m * n), where m is the number of nodes in subRoot and n is the number
+     * of nodes in root.
+     * Space Complexity: O(m + n)
+     */
     class Solution {
         public boolean isSubtree(TreeNode root, TreeNode subRoot) {
             if (subRoot == null) {
