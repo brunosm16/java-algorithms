@@ -102,4 +102,51 @@ class ConvertSortedArrayTest {
             assertEquals(4, root.right.right.val);
         }
     }
+
+    @Nested
+    class SolutionIIITest {
+        private final ConvertSortedArray.SolutionIII solution = tree.new SolutionIII();
+
+        @Test
+        void returnsNullForEmptyArray() {
+            ConvertSortedArray.TreeNode root = solution.sortedArrayToBST(new int[]{});
+
+            assertNull(root);
+        }
+
+        @Test
+        void convertsSingleValueArrayToSingleNodeTree() {
+            ConvertSortedArray.TreeNode root = solution.sortedArrayToBST(new int[]{7});
+
+            assertEquals(7, root.val);
+            assertNull(root.left);
+            assertNull(root.right);
+        }
+
+        @Test
+        void convertsSortedArrayToHeightBalancedBinarySearchTree() {
+            ConvertSortedArray.TreeNode root = solution.sortedArrayToBST(new int[]{-10, -3, 0, 5, 9});
+
+            assertEquals(0, root.val);
+            assertEquals(-10, root.left.val);
+            assertNull(root.left.left);
+            assertEquals(-3, root.left.right.val);
+            assertEquals(5, root.right.val);
+            assertNull(root.right.left);
+            assertEquals(9, root.right.right.val);
+        }
+
+        @Test
+        void convertsEvenSizedSortedArrayToHeightBalancedBinarySearchTree() {
+            ConvertSortedArray.TreeNode root = solution.sortedArrayToBST(new int[]{1, 2, 3, 4});
+
+            assertEquals(2, root.val);
+            assertEquals(1, root.left.val);
+            assertNull(root.left.left);
+            assertNull(root.left.right);
+            assertEquals(3, root.right.val);
+            assertNull(root.right.left);
+            assertEquals(4, root.right.right.val);
+        }
+    }
 }
