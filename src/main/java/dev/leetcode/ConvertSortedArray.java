@@ -23,7 +23,8 @@ public class ConvertSortedArray {
     }
 
     /**
-     * Time Complexity: O(nlogn)
+     * Time Complexity: O(nlogn). `logn` comes from creating a copy of each array,
+     * the algorithm requires `logn` levels of each array.
      * Space Complexity: O(n)
      */
     public class Solution {
