@@ -55,4 +55,40 @@ public class SubtreeOfAnotherTree {
             return false;
         }
     }
+
+    /**
+     * Serialization and Pattern Matching
+     * Time Complexity: O(m + n)
+     * Space Complexity: O(m + n)
+     */
+    class Solution2 {
+        public boolean isSubtree(TreeNode root, TreeNode subRoot) {
+            String serialized_subRoot = serialize(root);
+            String serialized_Root = serialize(root);
+
+            String combinedTrees = serialized_subRoot + "|" + serialized_Root;
+
+            return false;
+        }
+
+        private String serialize(TreeNode root) {
+            StringBuilder res = new StringBuilder();
+
+            serialize(root, res);
+
+            return res.toString();
+        }
+
+        private void serialize(TreeNode root, StringBuilder res) {
+            if (root == null) {
+                res.append("$#");
+                return;
+            }
+
+            res.append("$").append(root.val);
+
+            serialize(root.left, res);
+            serialize(root.right, res);
+        }
+    }
 }
