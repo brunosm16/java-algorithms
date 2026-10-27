@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ArrayListTest {
     @Test
@@ -40,6 +41,36 @@ class ArrayListTest {
                 IndexOutOfBoundsException.class, () -> new ArrayList<>(-1));
 
         assertEquals("Capacity of array cannot be negative: -1", exception.getMessage());
+    }
+
+    @Test
+    void sizeReturnsZeroForNewDefaultList() {
+        ArrayList<String> list = new ArrayList<>();
+
+        assertEquals(0, list.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 5, 16, 32})
+    void sizeReturnsZeroRegardlessOfInitialCapacity(int capacity) {
+        ArrayList<Integer> list = new ArrayList<>(capacity);
+
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    void isEmptyReturnsTrueForNewDefaultList() {
+        ArrayList<String> list = new ArrayList<>();
+
+        assertTrue(list.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 5, 16, 32})
+    void isEmptyReturnsTrueRegardlessOfInitialCapacity(int capacity) {
+        ArrayList<Integer> list = new ArrayList<>(capacity);
+
+        assertTrue(list.isEmpty());
     }
 
     @ParameterizedTest
