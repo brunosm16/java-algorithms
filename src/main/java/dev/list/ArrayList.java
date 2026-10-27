@@ -39,6 +39,7 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public E get(int idx) throws IndexOutOfBoundsException {
+        validateIdx(idx, size);
         return null;
     }
 
@@ -55,5 +56,11 @@ public class ArrayList<E> implements List<E> {
     @Override
     public E remove(int idx) throws IndexOutOfBoundsException {
         return null;
+    }
+
+    protected void validateIdx(int idx, int upperLimit) {
+        if (idx < 0 || idx >= upperLimit) {
+            throw new IllegalArgumentException("Current index is out of bounds" + "Upper Limit");
+        }
     }
 }
