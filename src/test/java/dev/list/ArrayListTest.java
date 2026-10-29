@@ -7,6 +7,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -93,6 +95,236 @@ class ArrayListTest {
                 IllegalArgumentException.class, () -> list.get(idx));
 
         assertEquals("Current index is out of boundsUpper Limit", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void replaceReturnsPreviousElementAndUpdatesOnlyRequestedIndex(int idx)
+            throws ReflectiveOperationException {
+        String[] original = {"first", "second", "third"};
+        ArrayList<String> list = listWithElements(original);
+
+        String previous = list.replace(idx, "replacement");
+
+        assertEquals(original[idx], previous);
+        assertEquals(3, list.size());
+        for (int i = 0; i < original.length; i++) {
+            assertEquals(i == idx ? "replacement" : original[i], list.get(i));
+        }
+    }
+
+    @Test
+    void replaceAcceptsNullElement() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("original");
+
+        assertEquals("original", list.replace(0, null));
+
+        assertNull(list.get(0));
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void replaceReturnsNullWhenPreviousElementIsNull() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements((String) null);
+
+        assertNull(list.replace(0, "replacement"));
+
+        assertEquals("replacement", list.get(0));
+        assertEquals(1, list.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, 1, 16, Integer.MAX_VALUE})
+    void replaceRejectsIndexesOnEmptyList(int idx) {
+        ArrayList<String> list = new ArrayList<>();
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> list.replace(idx, "replacement"));
+
+        assertEquals("Current index is out of boundsUpper Limit", exception.getMessage());
+        assertEquals(0, list.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1, 3, 4, 5, Integer.MAX_VALUE})
+    void replaceRejectsInvalidIndexesWithoutChangingElements(int idx)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second", "third");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> list.replace(idx, "replacement"));
+
+        assertEquals("Current index is out of boundsUpper Limit", exception.getMessage());
+        assertEquals(3, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+    }
+
+    @Test
+    void addInsertsFirstElementIntoEmptyList() {
+        ArrayList<String> list = new ArrayList<>(1);
+
+        list.add(0, "first");
+
+        assertEquals(1, list.size());
+        assertFalse(list.isEmpty());
+        assertEquals("first", list.get(0));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3})
+    void addInsertsAtRequestedIndexAndShiftsFollowingElements(int idx)
+            throws ReflectiveOperationException {
+        String[] original = {"first", "second", "third"};
+        ArrayList<String> list = listWithElements(original);
+
+        list.add(idx, "inserted");
+
+        assertEquals(4, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            String expected = i == idx ? "inserted" : original[i < idx ? i : i - 1];
+            assertEquals(expected, list.get(i));
+        }
+    }
+
+    @Test
+    void addAcceptsNullAndCountsItAsAnElement() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("original");
+
+        list.add(0, null);
+
+        assertEquals(2, list.size());
+        assertFalse(list.isEmpty());
+        assertNull(list.get(0));
+        assertEquals("original", list.get(1));
+    }
+
+    @Test
+    void addCanFillLastAvailableSlot() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(2, "first");
+
+        list.add(1, "second");
+
+        assertEquals(2, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void addRejectsFullListWithoutChangingElements(int idx) throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(2, "first", "second");
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class, () -> list.add(idx, "extra"));
+
+        assertEquals("Array capacity is full", exception.getMessage());
+        assertEquals(2, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+    }
+
+    @Test
+    void addRejectsZeroCapacityList() {
+        ArrayList<String> list = new ArrayList<>(0);
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class, () -> list.add(0, "first"));
+
+        assertEquals("Array capacity is full", exception.getMessage());
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1, 1, 16, Integer.MAX_VALUE})
+    void addRejectsInvalidIndexesOnEmptyList(int idx) {
+        ArrayList<String> list = new ArrayList<>();
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> list.add(idx, "first"));
+
+        assertEquals("Current index is out of boundsUpper Limit", exception.getMessage());
+        assertEquals(0, list.size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1, 4, 5, Integer.MAX_VALUE})
+    void addRejectsInvalidIndexesWithoutChangingElements(int idx)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second", "third");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> list.add(idx, "extra"));
+
+        assertEquals("Current index is out of boundsUpper Limit", exception.getMessage());
+        assertEquals(3, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+    }
+
+    @Test
+    void addSupportsRepeatedInsertionsUntilCapacityIsReached() {
+        ArrayList<String> list = new ArrayList<>(4);
+
+        list.add(0, "second");
+        list.add(0, "first");
+        list.add(2, "fourth");
+        list.add(2, "third");
+
+        assertEquals(4, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+        assertEquals("fourth", list.get(3));
+        assertThrows(IllegalStateException.class, () -> list.add(4, "extra"));
+        assertEquals(4, list.size());
+        assertEquals("fourth", list.get(3));
+    }
+
+    @Test
+    void addAllowsDuplicateElements() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("same", "last");
+
+        list.add(1, "same");
+
+        assertEquals(3, list.size());
+        assertEquals("same", list.get(0));
+        assertEquals("same", list.get(1));
+        assertEquals("last", list.get(2));
+    }
+
+    @Test
+    void addAtFrontShiftsElementsIntoLastAvailableSlot() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(3, "second", "third");
+
+        list.add(0, "first");
+
+        assertEquals(3, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+    }
+
+    // Populate directly to isolate each test from add() defects.
+    private static ArrayList<String> listWithElements(String... elements)
+            throws ReflectiveOperationException {
+        return listWithCapacityAndElements(elements.length + 2, elements);
+    }
+
+    private static ArrayList<String> listWithCapacityAndElements(int capacity, String... elements)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = new ArrayList<>(capacity);
+        Field data = ArrayList.class.getDeclaredField("data");
+        data.setAccessible(true);
+        System.arraycopy(elements, 0, data.get(list), 0, elements.length);
+
+        Field size = ArrayList.class.getDeclaredField("size");
+        size.setAccessible(true);
+        size.setInt(list, elements.length);
+        return list;
     }
 
     private static int capacityOf(ArrayList<?> list) throws ReflectiveOperationException {

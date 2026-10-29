@@ -40,22 +40,45 @@ public class ArrayList<E> implements List<E> {
     @Override
     public E get(int idx) throws IndexOutOfBoundsException {
         validateIdx(idx, size);
-        return null;
+        return data[idx];
     }
 
     @Override
     public void add(int idx, E e) throws IndexOutOfBoundsException {
+        validateIdx(idx, size + 1);
+        isArrayCapacityFull();
 
+        for(int i = size - 1; i >= idx; i--) {
+            // shift elements to right to build space for
+            // the element to be inserted
+            data[i + 1] = data[i];
+        }
+
+        putElement(idx, e);
+    }
+
+    private void putElement(int idx, E e) {
+        data[idx] = e;
+        size++;
     }
 
     @Override
     public E replace(int idx, E e) throws IndexOutOfBoundsException {
-        return null;
+        validateIdx(idx, size);
+        E replaced = data[idx];
+        data[idx] = e;
+        return replaced;
     }
 
     @Override
     public E remove(int idx) throws IndexOutOfBoundsException {
         return null;
+    }
+
+    protected void isArrayCapacityFull() throws IllegalStateException {
+        if (size == data.length) {
+            throw new IllegalStateException("Array capacity is full");
+        }
     }
 
     protected void validateIdx(int idx, int upperLimit) {
