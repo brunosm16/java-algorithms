@@ -48,7 +48,7 @@ public class ArrayList<E> implements List<E> {
         validateIdx(idx, size + 1);
         isArrayCapacityFull();
 
-        for(int i = size - 1; i >= idx; i--) {
+        for (int i = size - 1; i >= idx; i--) {
             // shift elements to right to build space for
             // the element to be inserted
             data[i + 1] = data[i];
@@ -76,7 +76,7 @@ public class ArrayList<E> implements List<E> {
 
         E removed = data[idx];
 
-        for(int i = idx; i < size - 1; i++) {
+        for (int i = idx; i < size - 1; i++) {
             data[i] = data[i + 1];
         }
 
@@ -95,5 +95,16 @@ public class ArrayList<E> implements List<E> {
         if (idx < 0 || idx >= upperLimit) {
             throw new IllegalArgumentException("Current index is out of bounds" + "Upper Limit");
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void resize(int capacity) {
+        E[] temp = (E[]) new Object[capacity];
+
+        if (size > 0) {
+            System.arraycopy(data, 0, temp, 0, size);
+        }
+
+        data = temp;
     }
 }

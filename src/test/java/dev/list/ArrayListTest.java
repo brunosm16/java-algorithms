@@ -488,6 +488,115 @@ class ArrayListTest {
         assertEquals("third", list.get(1));
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 8, 16, 32})
+    void resizeEmptyListChangesCapacityWithoutChangingSize(int capacity)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = new ArrayList<>();
+
+        list.resize(capacity);
+
+        assertEquals(capacity, capacityOf(list));
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {3, 5, 8})
+    void resizePreservesElementsAndSizeWhenShrinkingKeepingOrGrowingCapacity(int capacity)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(5, "first", null, "third");
+
+        list.resize(capacity);
+
+        assertEquals(capacity, capacityOf(list));
+        assertEquals(3, list.size());
+        assertFalse(list.isEmpty());
+        assertEquals("first", list.get(0));
+        assertNull(list.get(1));
+        assertEquals("third", list.get(2));
+        assertThrows(IllegalArgumentException.class, () -> list.get(3));
+    }
+
+    @Test
+    void resizePreservesStoredObjectReferences() {
+        ArrayList<Object> list = new ArrayList<>(1);
+        Object element = new Object();
+        list.add(0, element);
+
+        list.resize(2);
+
+        assertSame(element, list.get(0));
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void resizeFullListAllowsInsertionsUpToNewCapacity() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(1, "first");
+
+        list.resize(3);
+        list.add(1, "second");
+        list.add(2, "third");
+
+        assertEquals(3, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+        assertThrows(IllegalStateException.class, () -> list.add(3, "extra"));
+    }
+
+    @Test
+    void resizeZeroCapacityListAllowsInsertion() throws ReflectiveOperationException {
+        ArrayList<String> list = new ArrayList<>(0);
+
+        list.resize(1);
+        list.add(0, "first");
+
+        assertEquals(1, capacityOf(list));
+        assertEquals(1, list.size());
+        assertEquals("first", list.get(0));
+    }
+
+    @Test
+    void resizeToCurrentSizeLeavesListFull() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(5, "first", "second");
+
+        list.resize(2);
+
+        assertEquals(2, capacityOf(list));
+        assertThrows(IllegalStateException.class, () -> list.add(2, "extra"));
+        assertEquals(2, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void resizeBelowSizeThrowsWithoutChangingList(int capacity) throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(5, "first", "second", "third");
+
+        assertThrows(IndexOutOfBoundsException.class, () -> list.resize(capacity));
+
+        assertEquals(5, capacityOf(list));
+        assertEquals(3, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1})
+    void resizeRejectsNegativeCapacityWithoutChangingList(int capacity)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(2, "first");
+
+        assertThrows(NegativeArraySizeException.class, () -> list.resize(capacity));
+
+        assertEquals(2, capacityOf(list));
+        assertEquals(1, list.size());
+        assertEquals("first", list.get(0));
+    }
+
     // Populate directly to isolate each test from add() defects.
     private static ArrayList<String> listWithElements(String... elements)
             throws ReflectiveOperationException {
