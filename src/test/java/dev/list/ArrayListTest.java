@@ -214,28 +214,29 @@ class ArrayListTest {
 
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 2})
-    void addRejectsFullListWithoutChangingElements(int idx) throws ReflectiveOperationException {
-        ArrayList<String> list = listWithCapacityAndElements(2, "first", "second");
+    void addToFullListDoublesCapacityAndPreservesOrder(int idx) throws ReflectiveOperationException {
+        String[] original = {"first", "second"};
+        ArrayList<String> list = listWithCapacityAndElements(2, original);
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class, () -> list.add(idx, "extra"));
+        list.add(idx, "extra");
 
-        assertEquals("Array capacity is full", exception.getMessage());
-        assertEquals(2, list.size());
-        assertEquals("first", list.get(0));
-        assertEquals("second", list.get(1));
+        assertEquals(4, capacityOf(list));
+        assertEquals(3, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(i == idx ? "extra" : original[i < idx ? i : i - 1], list.get(i));
+        }
     }
 
     @Test
-    void addRejectsZeroCapacityList() {
+    void addGrowsZeroCapacityList() throws ReflectiveOperationException {
         ArrayList<String> list = new ArrayList<>(0);
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class, () -> list.add(0, "first"));
+        list.add(0, "first");
 
-        assertEquals("Array capacity is full", exception.getMessage());
-        assertEquals(0, list.size());
-        assertTrue(list.isEmpty());
+        assertEquals(1, capacityOf(list));
+        assertEquals(1, list.size());
+        assertFalse(list.isEmpty());
+        assertEquals("first", list.get(0));
     }
 
     @ParameterizedTest
@@ -267,7 +268,7 @@ class ArrayListTest {
     }
 
     @Test
-    void addSupportsRepeatedInsertionsUntilCapacityIsReached() {
+    void addSupportsRepeatedInsertionsBeyondInitialCapacity() throws ReflectiveOperationException {
         ArrayList<String> list = new ArrayList<>(4);
 
         list.add(0, "second");
@@ -280,9 +281,11 @@ class ArrayListTest {
         assertEquals("second", list.get(1));
         assertEquals("third", list.get(2));
         assertEquals("fourth", list.get(3));
-        assertThrows(IllegalStateException.class, () -> list.add(4, "extra"));
-        assertEquals(4, list.size());
+        list.add(4, "extra");
+        assertEquals(8, capacityOf(list));
+        assertEquals(5, list.size());
         assertEquals("fourth", list.get(3));
+        assertEquals("extra", list.get(4));
     }
 
     @Test
@@ -473,7 +476,7 @@ class ArrayListTest {
         for (int i = 0; i < list.size(); i++) {
             assertEquals(i == idx ? "replacement" : original[i], list.get(i));
         }
-        assertThrows(IllegalStateException.class, () -> list.add(3, "extra"));
+        assertEquals(3, capacityOf(list));
     }
 
     @Test
@@ -542,7 +545,7 @@ class ArrayListTest {
         assertEquals("first", list.get(0));
         assertEquals("second", list.get(1));
         assertEquals("third", list.get(2));
-        assertThrows(IllegalStateException.class, () -> list.add(3, "extra"));
+        assertEquals(3, capacityOf(list));
     }
 
     @Test
@@ -558,16 +561,18 @@ class ArrayListTest {
     }
 
     @Test
-    void resizeToCurrentSizeLeavesListFull() throws ReflectiveOperationException {
+    void resizeToCurrentSizeAllowsAutomaticGrowthOnNextInsertion() throws ReflectiveOperationException {
         ArrayList<String> list = listWithCapacityAndElements(5, "first", "second");
 
         list.resize(2);
 
         assertEquals(2, capacityOf(list));
-        assertThrows(IllegalStateException.class, () -> list.add(2, "extra"));
-        assertEquals(2, list.size());
+        list.add(2, "extra");
+        assertEquals(4, capacityOf(list));
+        assertEquals(3, list.size());
         assertEquals("first", list.get(0));
         assertEquals("second", list.get(1));
+        assertEquals("extra", list.get(2));
     }
 
     @ParameterizedTest
@@ -595,6 +600,61 @@ class ArrayListTest {
         assertEquals(2, capacityOf(list));
         assertEquals(1, list.size());
         assertEquals("first", list.get(0));
+    }
+
+    @Test
+    void addPreservesElementsAcrossMultipleAutomaticResizes() throws ReflectiveOperationException {
+        ArrayList<Integer> list = new ArrayList<>(1);
+
+        for (int i = 0; i < 33; i++) {
+            list.add(i, i);
+        }
+
+        assertEquals(64, capacityOf(list));
+        assertEquals(33, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(Integer.valueOf(i), list.get(i));
+        }
+    }
+
+    @Test
+    void addWithoutFullCapacityDoesNotResize() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(4, "first");
+
+        list.add(0, "new first");
+
+        assertEquals(4, capacityOf(list));
+        assertEquals(2, list.size());
+        assertEquals("new first", list.get(0));
+        assertEquals("first", list.get(1));
+    }
+
+    @Test
+    void addDuringAutomaticResizePreservesNullsAndObjectReferences() {
+        ArrayList<Object> list = new ArrayList<>(2);
+        Object element = new Object();
+        list.add(0, element);
+        list.add(1, null);
+
+        list.add(0, null);
+
+        assertEquals(3, list.size());
+        assertNull(list.get(0));
+        assertSame(element, list.get(1));
+        assertNull(list.get(2));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 3})
+    void addRejectsInvalidIndexOnFullListWithoutResizing(int idx) throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(2, "first", "second");
+
+        assertThrows(IllegalArgumentException.class, () -> list.add(idx, "extra"));
+
+        assertEquals(2, capacityOf(list));
+        assertEquals(2, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
     }
 
     // Populate directly to isolate each test from add() defects.

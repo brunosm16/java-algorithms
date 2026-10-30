@@ -46,7 +46,10 @@ public class ArrayList<E> implements List<E> {
     @Override
     public void add(int idx, E e) throws IndexOutOfBoundsException {
         validateIdx(idx, size + 1);
-        isArrayCapacityFull();
+
+        if (isArrayCapacityFull()) {
+            resize(Math.max(1, size * 2));
+        }
 
         for (int i = size - 1; i >= idx; i--) {
             // shift elements to right to build space for
@@ -85,10 +88,8 @@ public class ArrayList<E> implements List<E> {
         return removed;
     }
 
-    protected void isArrayCapacityFull() throws IllegalStateException {
-        if (size == data.length) {
-            throw new IllegalStateException("Array capacity is full");
-        }
+    private boolean isArrayCapacityFull() {
+        return size == data.length;
     }
 
     protected void validateIdx(int idx, int upperLimit) {
