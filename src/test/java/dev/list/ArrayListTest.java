@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -306,6 +307,185 @@ class ArrayListTest {
         assertEquals("first", list.get(0));
         assertEquals("second", list.get(1));
         assertEquals("third", list.get(2));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void removeReturnsElementAndPreservesRemainingOrder(int idx) throws ReflectiveOperationException {
+        String[] original = {"first", "second", "third"};
+        ArrayList<String> list = listWithElements(original);
+
+        assertEquals(original[idx], list.remove(idx));
+
+        assertEquals(2, list.size());
+        assertFalse(list.isEmpty());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(original[i < idx ? i : i + 1], list.get(i));
+        }
+        assertThrows(IllegalArgumentException.class, () -> list.get(2));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void removeFromFullListClearsVacatedSlot(int idx) throws ReflectiveOperationException {
+        String[] original = {"first", "second", "third"};
+        ArrayList<String> list = listWithCapacityAndElements(3, original);
+
+        assertEquals(original[idx], list.remove(idx));
+
+        assertEquals(2, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(original[i < idx ? i : i + 1], list.get(i));
+        }
+        Field data = ArrayList.class.getDeclaredField("data");
+        data.setAccessible(true);
+        Object[] storage = (Object[]) data.get(list);
+        assertEquals(3, storage.length);
+        assertNull(storage[2]);
+    }
+
+    @Test
+    void removeOnlyElementLeavesEmptyListAndClearsSlot() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(1, "only");
+
+        assertEquals("only", list.remove(0));
+
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        Field data = ArrayList.class.getDeclaredField("data");
+        data.setAccessible(true);
+        assertNull(((Object[]) data.get(list))[0]);
+        assertThrows(IllegalArgumentException.class, () -> list.remove(0));
+    }
+
+    @Test
+    void removeReturnsNullForNullElement() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", null, "third");
+
+        assertNull(list.remove(1));
+
+        assertEquals(2, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("third", list.get(1));
+    }
+
+    @Test
+    void removeShiftsNullElementsWithoutDroppingThem() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", null, "third");
+
+        assertEquals("first", list.remove(0));
+
+        assertEquals(2, list.size());
+        assertNull(list.get(0));
+        assertEquals("third", list.get(1));
+    }
+
+    @Test
+    void removeDeletesOnlyRequestedDuplicate() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("same", "middle", "same");
+
+        assertEquals("same", list.remove(2));
+
+        assertEquals(2, list.size());
+        assertEquals("same", list.get(0));
+        assertEquals("middle", list.get(1));
+    }
+
+    @Test
+    void removeRepeatedlyEmptiesListAndAllowsReuse() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithCapacityAndElements(3, "first", "second", "third");
+
+        assertEquals("second", list.remove(1));
+        assertEquals("third", list.remove(1));
+        assertEquals("first", list.remove(0));
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+
+        list.add(0, "new first");
+        list.add(1, "new second");
+        list.add(2, "new third");
+
+        assertEquals(3, list.size());
+        assertEquals("new first", list.get(0));
+        assertEquals("new second", list.get(1));
+        assertEquals("new third", list.get(2));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1, 0, 1, 16, Integer.MAX_VALUE})
+    void removeRejectsIndexesOnEmptyList(int idx) {
+        ArrayList<String> list = new ArrayList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(idx));
+
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    void removeRejectsZeroCapacityList() {
+        ArrayList<String> list = new ArrayList<>(0);
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(0));
+
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {Integer.MIN_VALUE, -1, 3, 4, Integer.MAX_VALUE})
+    void removeRejectsInvalidIndexesWithoutChangingElements(int idx)
+            throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second", "third");
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(idx));
+
+        assertEquals(3, list.size());
+        assertEquals("first", list.get(0));
+        assertEquals("second", list.get(1));
+        assertEquals("third", list.get(2));
+    }
+
+    @Test
+    void removeReturnsExactStoredInstance() {
+        ArrayList<Object> list = new ArrayList<>(2);
+        Object first = new Object();
+        Object second = new Object();
+        list.add(0, first);
+        list.add(1, second);
+
+        assertSame(first, list.remove(0));
+
+        assertEquals(1, list.size());
+        assertSame(second, list.get(0));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void removeFromFullListAllowsAnotherInsertion(int idx) throws ReflectiveOperationException {
+        String[] original = {"first", "second", "third"};
+        ArrayList<String> list = listWithCapacityAndElements(3, original);
+
+        assertEquals(original[idx], list.remove(idx));
+        list.add(idx, "replacement");
+
+        assertEquals(3, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(i == idx ? "replacement" : original[i], list.get(i));
+        }
+        assertThrows(IllegalStateException.class, () -> list.add(3, "extra"));
+    }
+
+    @Test
+    void removeRejectsFormerLastIndexAfterListShrinks() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second", "third");
+
+        assertEquals("first", list.remove(0));
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(2));
+        assertEquals(2, list.size());
+        assertEquals("second", list.get(0));
+        assertEquals("third", list.get(1));
     }
 
     // Populate directly to isolate each test from add() defects.

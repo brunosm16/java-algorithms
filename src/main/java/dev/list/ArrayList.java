@@ -72,7 +72,17 @@ public class ArrayList<E> implements List<E> {
 
     @Override
     public E remove(int idx) throws IndexOutOfBoundsException {
-        return null;
+        validateIdx(idx, size);
+
+        E removed = data[idx];
+
+        for(int i = idx; i < size - 1; i++) {
+            data[i] = data[i + 1];
+        }
+
+        data[size - 1] = null;
+        size--;
+        return removed;
     }
 
     protected void isArrayCapacityFull() throws IllegalStateException {
