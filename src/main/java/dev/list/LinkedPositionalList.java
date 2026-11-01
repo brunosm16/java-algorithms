@@ -3,6 +3,7 @@ package dev.list;
 public class LinkedPositionalList<E> implements PositionalList<E> {
     /**
      * Nested Node class
+     *
      * @param <E> - generic type for List.
      */
     private static class Node<E> implements Position<E> {
@@ -52,6 +53,39 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         }
     }
 
+    private Node<E> header;
+
+    private Node<E> trailer;
+
+    private int size = 0;
+
+    public LinkedPositionalList() {
+        header = new Node<>(null, null, null);
+        trailer = new Node<>(null, header, null);
+
+        header.setNext(trailer);
+    }
+
+    private Node<E> validate(Position<E> p) throws IllegalArgumentException {
+        if(!(p instanceof Node<E> node)) {
+            throw new IllegalArgumentException("Invalid position p instance");
+        }
+
+        if(node.getNext() == null) {
+            throw new IllegalArgumentException("Position no longer valid");
+        }
+
+        return node;
+    }
+
+    private Position<E> getPositionAsNode(Node<E> node) {
+        // Do not expose sentinel nodes.
+        if(node == trailer || node == header) {
+            return null;
+        }
+
+        return node;
+    }
 
     @Override
     public int size() {
