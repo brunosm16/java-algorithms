@@ -67,11 +67,11 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
     }
 
     private Node<E> getPositionAsNode(Position<E> p) throws IllegalArgumentException {
-        if(!(p instanceof Node<E> node)) {
+        if (!(p instanceof Node<E> node)) {
             throw new IllegalArgumentException("Invalid position p instance");
         }
 
-        if(node.getNext() == null) {
+        if (node.getNext() == null) {
             throw new IllegalArgumentException("Position no longer valid");
         }
 
@@ -80,11 +80,21 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     private Position<E> getNodeAsPosition(Node<E> node) {
         // Do not expose sentinel nodes.
-        if(node == trailer || node == header) {
+        if (node == trailer || node == header) {
             return null;
         }
 
         return node;
+    }
+
+    private Position<E> addBetween(E el, Node<E> prev, Node<E> next) {
+        Node<E> newest = new Node<>(el, prev, next);
+
+        prev.setNext(newest);
+        next.setPrev(newest);
+        size++;
+
+        return newest;
     }
 
     @Override
@@ -121,7 +131,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     @Override
     public Position<E> addFirst(E e) {
-        return null;
+        return addBetween(e, header, header.getNext());
     }
 
     @Override
