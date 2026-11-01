@@ -136,7 +136,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     @Override
     public Position<E> addLast(E e) {
-        return null;
+        return addBetween(e, trailer.getPrev(), trailer);
     }
 
     @Override
