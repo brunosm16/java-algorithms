@@ -66,7 +66,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         header.setNext(trailer);
     }
 
-    private Node<E> validate(Position<E> p) throws IllegalArgumentException {
+    private Node<E> getPositionAsNode(Position<E> p) throws IllegalArgumentException {
         if(!(p instanceof Node<E> node)) {
             throw new IllegalArgumentException("Invalid position p instance");
         }
@@ -78,7 +78,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         return node;
     }
 
-    private Position<E> getPositionAsNode(Node<E> node) {
+    private Position<E> getNodeAsPosition(Node<E> node) {
         // Do not expose sentinel nodes.
         if(node == trailer || node == header) {
             return null;
@@ -89,32 +89,34 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     @Override
     public Position<E> first() {
-        return null;
+        return getNodeAsPosition(header.getNext());
     }
 
     @Override
     public Position<E> last() {
-        return null;
+        return getNodeAsPosition(trailer.getPrev());
     }
 
     @Override
     public Position<E> before(Position<E> p) {
-        return null;
+        Node<E> node = getPositionAsNode(p);
+        return getNodeAsPosition(node.getPrev());
     }
 
     @Override
     public Position<E> after(Position<E> p) {
-        return null;
+        Node<E> node = getPositionAsNode(p);
+        return getNodeAsPosition(node.getNext());
     }
 
     @Override
