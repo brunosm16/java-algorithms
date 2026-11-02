@@ -153,7 +153,10 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     @Override
     public E replaceEl(Position<E> p, E e) throws IllegalArgumentException {
-        return null;
+        Node<E> node = getPositionAsNode(p);
+        E replaced = node.getElement();
+        node.setElement(e);
+        return replaced;
     }
 
     @Override

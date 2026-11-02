@@ -15,6 +15,136 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LinkedPositionalListTest {
+    @ParameterizedTest(name = "insert X after index {0}: [A B C] becomes [{1}]")
+    @CsvSource({
+            "0, A X B C",
+            "1, A B X C",
+            "2, A B C X"
+    })
+    void addAfterInsertsAfterFirstMiddleOrLastPosition(int targetIndex, String expectedOrder) {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addLast("A");
+        Position<String> b = list.addLast("B");
+        Position<String> c = list.addLast("C");
+        List<Position<String>> originalPositions = List.of(a, b, c);
+        Position<String> target = originalPositions.get(targetIndex);
+
+        Position<String> x = list.addAfter(target, "X");
+
+        assertEquals(4, list.size());
+        assertFalse(list.isEmpty());
+        assertSame(a, list.first());
+        assertEquals("X", x.getElement());
+        assertEquals("A", a.getElement());
+        assertEquals("B", b.getElement());
+        assertEquals("C", c.getElement());
+        assertSame(x, list.after(target));
+        assertSame(target, list.before(x));
+
+        List<String> actualOrder = new ArrayList<>();
+        Position<String> current = list.first();
+        Position<String> previous = null;
+        for (int i = 0; i < list.size(); i++) {
+            assertSame(previous, list.before(current));
+            actualOrder.add(current.getElement());
+            previous = current;
+            current = list.after(current);
+        }
+        assertNull(current);
+        assertSame(previous, list.last());
+        assertEquals(expectedOrder, String.join(" ", actualOrder));
+    }
+
+    @Test
+    void addAfterOnlyPositionUpdatesLastAndPreservesFirst() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+
+        Position<String> x = list.addAfter(a, "X");
+
+        assertEquals(2, list.size());
+        assertFalse(list.isEmpty());
+        assertSame(a, list.first());
+        assertSame(x, list.last());
+        assertEquals("A", a.getElement());
+        assertEquals("X", x.getElement());
+        assertNull(list.before(a));
+        assertSame(x, list.after(a));
+        assertSame(a, list.before(x));
+        assertNull(list.after(x));
+    }
+
+    @Test
+    void addAfterAcceptsNullAndCountsItAsAnElement() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+
+        Position<String> nullPosition = list.addAfter(a, null);
+
+        assertEquals(2, list.size());
+        assertFalse(list.isEmpty());
+        assertSame(a, list.first());
+        assertSame(nullPosition, list.last());
+        assertEquals("A", a.getElement());
+        assertNull(nullPosition.getElement());
+        assertNull(list.before(a));
+        assertSame(nullPosition, list.after(a));
+        assertSame(a, list.before(nullPosition));
+        assertNull(list.after(nullPosition));
+    }
+
+    @Test
+    void addAfterRejectsNullPositionOnEmptyList() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> list.addAfter(null, "X"));
+
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        assertNull(list.first());
+        assertNull(list.last());
+    }
+
+    @Test
+    void addAfterRejectsCustomPositionWithoutChangingList() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+        Position<String> invalid = () -> "outside";
+
+        assertThrows(IllegalArgumentException.class, () -> list.addAfter(invalid, "X"));
+
+        assertEquals(1, list.size());
+        assertFalse(list.isEmpty());
+        assertSame(a, list.first());
+        assertSame(a, list.last());
+        assertEquals("A", a.getElement());
+        assertNull(list.before(a));
+        assertNull(list.after(a));
+    }
+
+    @Test
+    void addAfterRejectsPositionFromAnotherListWithoutChangingEitherList() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+        LinkedPositionalList<String> other = new LinkedPositionalList<>();
+        Position<String> foreign = other.addFirst("foreign");
+
+        assertThrows(IllegalArgumentException.class, () -> list.addAfter(foreign, "X"));
+
+        assertEquals(1, list.size());
+        assertSame(a, list.first());
+        assertSame(a, list.last());
+        assertEquals("A", a.getElement());
+        assertNull(list.before(a));
+        assertNull(list.after(a));
+        assertEquals(1, other.size());
+        assertSame(foreign, other.first());
+        assertSame(foreign, other.last());
+        assertEquals("foreign", foreign.getElement());
+        assertNull(other.before(foreign));
+        assertNull(other.after(foreign));
+    }
+
     @ParameterizedTest(name = "insert X before index {0}: [A B C] becomes [{1}]")
     @CsvSource({
             "0, X A B C",
