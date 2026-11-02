@@ -141,12 +141,14 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     @Override
     public Position<E> addBefore(Position<E> p, E e) throws IllegalArgumentException {
-        return null;
+        Node<E> node = getPositionAsNode(p);
+        return addBetween(e, node.getPrev(), node);
     }
 
     @Override
     public Position<E> addAfter(Position<E> p, E e) throws IllegalArgumentException {
-        return null;
+        Node<E> node = getPositionAsNode(p);
+        return addBetween(e, node, node.getNext());
     }
 
     @Override
