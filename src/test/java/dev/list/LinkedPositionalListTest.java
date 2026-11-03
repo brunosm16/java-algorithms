@@ -560,4 +560,145 @@ class LinkedPositionalListTest {
         assertNull(other.before(foreign));
         assertNull(other.after(foreign));
     }
+
+    @ParameterizedTest(name = "remove index {0}: [A B C] becomes [{2}], returns {1}")
+    @CsvSource({
+            "0, A, B C",
+            "1, B, A C",
+            "2, C, A B"
+    })
+    void removeFirstMiddleOrLastPositionReturnsElementAndReconnectsNeighbors(
+            int targetIndex, String expectedRemovedElement, String expectedOrder) {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addLast("A");
+        Position<String> b = list.addLast("B");
+        Position<String> c = list.addLast("C");
+        List<Position<String>> positions = new ArrayList<>(List.of(a, b, c));
+        Position<String> target = positions.get(targetIndex);
+
+        String removedElement = list.remove(target);
+
+        assertEquals(expectedRemovedElement, removedElement);
+        assertEquals(2, list.size());
+        assertFalse(list.isEmpty());
+        positions.remove(targetIndex);
+        Position<String> firstRemaining = positions.get(0);
+        Position<String> lastRemaining = positions.get(1);
+        assertSame(firstRemaining, list.first());
+        assertSame(lastRemaining, list.last());
+        assertEquals(expectedOrder, String.join(" ", list.first().getElement(), list.last().getElement()));
+        assertNull(list.before(firstRemaining));
+        assertSame(lastRemaining, list.after(firstRemaining));
+        assertSame(firstRemaining, list.before(lastRemaining));
+        assertNull(list.after(lastRemaining));
+        assertThrows(IllegalStateException.class, target::getElement);
+    }
+
+    @Test
+    void removeOnlyPositionReturnsElementAndLeavesListEmpty() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+
+        String removedElement = list.remove(a);
+
+        assertEquals("A", removedElement);
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        assertNull(list.first());
+        assertNull(list.last());
+        assertThrows(IllegalStateException.class, a::getElement);
+    }
+
+    @Test
+    void removeNullElementReturnsNullAndPreservesRemainingPosition() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> nullPosition = list.addLast(null);
+        Position<String> a = list.addLast("A");
+
+        String removedElement = list.remove(nullPosition);
+
+        assertNull(removedElement);
+        assertEquals(1, list.size());
+        assertFalse(list.isEmpty());
+        assertSame(a, list.first());
+        assertSame(a, list.last());
+        assertEquals("A", a.getElement());
+        assertNull(list.before(a));
+        assertNull(list.after(a));
+        assertThrows(IllegalStateException.class, nullPosition::getElement);
+    }
+
+    @Test
+    void removeInvalidatesPositionForAllSubsequentOperations() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addLast("A");
+        Position<String> b = list.addLast("B");
+        list.remove(a);
+
+        assertThrows(IllegalStateException.class, a::getElement);
+        assertThrows(IllegalArgumentException.class, () -> list.remove(a));
+        assertThrows(IllegalArgumentException.class, () -> list.before(a));
+        assertThrows(IllegalArgumentException.class, () -> list.after(a));
+        assertThrows(IllegalArgumentException.class, () -> list.addBefore(a, "X"));
+        assertThrows(IllegalArgumentException.class, () -> list.addAfter(a, "X"));
+        assertThrows(IllegalArgumentException.class, () -> list.replaceEl(a, "X"));
+
+        assertEquals(1, list.size());
+        assertSame(b, list.first());
+        assertSame(b, list.last());
+        assertEquals("B", b.getElement());
+        assertNull(list.before(b));
+        assertNull(list.after(b));
+    }
+
+    @Test
+    void removeRejectsNullPositionOnEmptyList() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(null));
+
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        assertNull(list.first());
+        assertNull(list.last());
+    }
+
+    @Test
+    void removeRejectsCustomPositionWithoutChangingList() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+        Position<String> invalid = () -> "outside";
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(invalid));
+
+        assertEquals(1, list.size());
+        assertSame(a, list.first());
+        assertSame(a, list.last());
+        assertEquals("A", a.getElement());
+        assertNull(list.before(a));
+        assertNull(list.after(a));
+    }
+
+    @Test
+    void removeRejectsPositionFromAnotherListWithoutChangingEitherList() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> a = list.addFirst("A");
+        LinkedPositionalList<String> other = new LinkedPositionalList<>();
+        Position<String> foreign = other.addFirst("foreign");
+
+        assertThrows(IllegalArgumentException.class, () -> list.remove(foreign));
+
+        assertEquals(1, list.size());
+        assertSame(a, list.first());
+        assertSame(a, list.last());
+        assertEquals("A", a.getElement());
+        assertNull(list.before(a));
+        assertNull(list.after(a));
+        assertEquals(1, other.size());
+        assertSame(foreign, other.first());
+        assertSame(foreign, other.last());
+        assertEquals("foreign", foreign.getElement());
+        assertNull(other.before(foreign));
+        assertNull(other.after(foreign));
+    }
 }
