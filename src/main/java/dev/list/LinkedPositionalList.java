@@ -1,5 +1,7 @@
 package dev.list;
 
+import java.util.Iterator;
+
 public class LinkedPositionalList<E> implements PositionalList<E> {
     /**
      * Nested Node class
