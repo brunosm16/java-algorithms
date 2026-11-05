@@ -1,5 +1,8 @@
 package dev.list;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 public class ArrayList<E> implements List<E> {
     /**
      * Default array capacity only allows a maximum of
@@ -107,5 +110,44 @@ public class ArrayList<E> implements List<E> {
         }
 
         data = temp;
+    }
+
+    private class ArrayIterator implements Iterator<E> {
+        private int nextIdx = 0;
+        private boolean isAllowedToRemove = false;
+
+
+        @Override
+        public boolean hasNext() {
+            return nextIdx < size;
+        }
+
+        @Override
+        public E next() throws NoSuchElementException {
+            if (nextIdx == size) {
+                throw new NoSuchElementException("Next element not available");
+            }
+
+            isAllowedToRemove = true;
+
+            return data[nextIdx++];
+        }
+
+        public void remove() throws IllegalStateException {
+            // Freeze remove only when next() is called
+            if (!isAllowedToRemove) {
+                throw new IllegalStateException("No element available to be removed");
+            }
+
+            ArrayList.this.remove(nextIdx - 1);
+            nextIdx--;
+
+            // Remove only allowed when next() is called again
+            isAllowedToRemove = false;
+        }
+    }
+
+    public Iterator<E> iterator() {
+        return new ArrayIterator();
     }
 }

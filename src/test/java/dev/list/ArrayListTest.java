@@ -5,6 +5,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -655,6 +657,144 @@ class ArrayListTest {
         assertEquals(2, list.size());
         assertEquals("first", list.get(0));
         assertEquals("second", list.get(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 16})
+    void iteratorOnEmptyListHasNoNextElement(int capacity) {
+        ArrayList<String> list = new ArrayList<>(capacity);
+        Iterator<String> iterator = list.iterator();
+
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertFalse(iterator.hasNext());
+        assertThrows(IllegalStateException.class, iterator::remove);
+    }
+
+    @Test
+    void iteratorTraversesElementsInOrderWithoutAdvancingOnHasNext()
+            throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second", "third");
+        Iterator<String> iterator = list.iterator();
+
+        for (String expected : new String[]{"first", "second", "third"}) {
+            assertTrue(iterator.hasNext());
+            assertTrue(iterator.hasNext());
+            assertEquals(expected, iterator.next());
+        }
+
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    void iteratorReturnsNullsAndDuplicatesAsElements() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements(null, "same", "same", null);
+        Iterator<String> iterator = list.iterator();
+
+        assertNull(iterator.next());
+        assertEquals("same", iterator.next());
+        assertEquals("same", iterator.next());
+        assertTrue(iterator.hasNext());
+        assertNull(iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void iteratorReturnsExactStoredInstance() {
+        ArrayList<Object> list = new ArrayList<>();
+        Object element = new Object();
+        list.add(0, element);
+
+        assertSame(element, list.iterator().next());
+    }
+
+    @Test
+    void iteratorsMaintainIndependentPositions() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second");
+        Iterator<String> first = list.iterator();
+        Iterator<String> second = list.iterator();
+
+        assertEquals("first", first.next());
+        assertEquals("second", first.next());
+        assertFalse(first.hasNext());
+        assertEquals("first", second.next());
+        assertTrue(second.hasNext());
+        assertEquals("second", second.next());
+        assertFalse(second.hasNext());
+    }
+
+    @Test
+    void iteratorRemoveBeforeNextThrowsWithoutChangingList() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", "second");
+        Iterator<String> iterator = list.iterator();
+
+        assertTrue(iterator.hasNext());
+        assertThrows(IllegalStateException.class, iterator::remove);
+        assertEquals(2, list.size());
+        assertEquals("first", iterator.next());
+        assertEquals("second", list.get(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void iteratorRemoveDeletesLastReturnedElementAndContinuesWithoutSkipping(int idx)
+            throws ReflectiveOperationException {
+        String[] original = {"first", "second", "third"};
+        ArrayList<String> list = listWithElements(original);
+        Iterator<String> iterator = list.iterator();
+        for (int i = 0; i <= idx; i++) {
+            assertEquals(original[i], iterator.next());
+        }
+
+        iterator.remove();
+
+        assertEquals(2, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            assertEquals(original[i < idx ? i : i + 1], list.get(i));
+        }
+        assertThrows(IllegalStateException.class, iterator::remove);
+        for (int i = idx + 1; i < original.length; i++) {
+            assertTrue(iterator.hasNext());
+            assertEquals(original[i], iterator.next());
+        }
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+    }
+
+    @Test
+    void iteratorCanRemoveEveryElementIncludingNull() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("first", null, "third");
+        Iterator<String> iterator = list.iterator();
+
+        for (String expected : new String[]{"first", null, "third"}) {
+            assertTrue(iterator.hasNext());
+            assertEquals(expected, iterator.next());
+            iterator.remove();
+        }
+
+        assertTrue(list.isEmpty());
+        assertEquals(0, list.size());
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertThrows(IllegalStateException.class, iterator::remove);
+    }
+
+    @Test
+    void iteratorCanRemoveLastElementAfterFailedNext() throws ReflectiveOperationException {
+        ArrayList<String> list = listWithElements("only");
+        Iterator<String> iterator = list.iterator();
+        assertEquals("only", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+
+        iterator.remove();
+
+        assertTrue(list.isEmpty());
+        assertFalse(iterator.hasNext());
+        assertThrows(IllegalStateException.class, iterator::remove);
     }
 
     // Populate directly to isolate each test from add() defects.
