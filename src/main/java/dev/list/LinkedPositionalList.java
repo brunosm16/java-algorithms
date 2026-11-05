@@ -1,6 +1,7 @@
 package dev.list;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class LinkedPositionalList<E> implements PositionalList<E> {
     /**
@@ -163,21 +164,66 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     @Override
     public E remove(Position<E> p) throws IllegalArgumentException {
-       Node<E> node = getPositionAsNode(p);
-       Node<E> prev = node.getPrev();
-       Node<E> next = node.getNext();
+        Node<E> node = getPositionAsNode(p);
+        Node<E> prev = node.getPrev();
+        Node<E> next = node.getNext();
 
-       prev.setNext(next);
-       next.setPrev(prev);
-       size--;
+        prev.setNext(next);
+        next.setPrev(prev);
+        size--;
 
-       E removed = node.getElement();
+        E removed = node.getElement();
 
-       // Help java garbage collection
-       node.setElement(null);
-       node.setPrev(null);
-       node.setNext(null);
+        // Help java garbage collection
+        node.setElement(null);
+        node.setPrev(null);
+        node.setNext(null);
 
-       return removed;
+        return removed;
+    }
+
+    private class PositionIterator implements Iterator<Position<E>> {
+        private Position<E> cursor = first();
+        private Position<E> latest = null;
+
+        @Override
+        public boolean hasNext() {
+            return cursor != null;
+        }
+
+        @Override
+        public Position<E> next() throws NoSuchElementException {
+            if(cursor == null) {
+                throw new NoSuchElementException("List has no next element available");
+            }
+
+            latest = cursor;
+            cursor = after(cursor);
+
+            return latest;
+        }
+
+        public void remove() throws IllegalStateException {
+            if(latest == null) {
+                throw new IllegalStateException("No element available to be removed");
+            }
+
+            LinkedPositionalList.this.remove(latest);
+
+            // Remove is only allowed to be called again when next() is called.
+            latest = null;
+        }
+    }
+
+    private class PositionIterable implements Iterable<Position<E>> {
+
+        @Override
+        public Iterator<Position<E>> iterator() {
+            return new PositionIterator();
+        }
+    }
+
+    public Iterable<Position<E>> positions() {
+        return new PositionIterable();
     }
 }
