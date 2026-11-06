@@ -56,9 +56,9 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         }
     }
 
-    private Node<E> header;
+    private final Node<E> header;
 
-    private Node<E> trailer;
+    private final Node<E> trailer;
 
     private int size = 0;
 
@@ -223,7 +223,29 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         }
     }
 
+    private class ElementIterator implements Iterator<E> {
+        Iterator<Position<E>> positionIterator = new PositionIterator();
+
+        @Override
+        public boolean hasNext() {
+            return positionIterator.hasNext();
+        }
+
+        @Override
+        public E next() {
+            return positionIterator.next().getElement();
+        }
+
+        public void remove() {
+            positionIterator.remove();
+        }
+    }
+
     public Iterable<Position<E>> positions() {
         return new PositionIterable();
+    }
+
+    public Iterator<E> iterator() {
+        return new ElementIterator();
     }
 }

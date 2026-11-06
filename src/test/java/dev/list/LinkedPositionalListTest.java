@@ -860,4 +860,249 @@ class LinkedPositionalListTest {
         assertFalse(iterator.hasNext());
         assertThrows(IllegalStateException.class, iterator::remove);
     }
+
+    @Test
+    void elementIteratorOnEmptyListHasNoNext() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Iterator<String> iterator = list.iterator();
+
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertFalse(iterator.hasNext());
+        assertThrows(IllegalStateException.class, iterator::remove);
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    void elementIteratorReturnsElementsInOrder() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("first");
+        list.addLast("second");
+        list.addLast("third");
+        Iterator<String> iterator = list.iterator();
+
+        assertTrue(iterator.hasNext());
+        assertEquals("first", iterator.next());
+        assertTrue(iterator.hasNext());
+        assertEquals("second", iterator.next());
+        assertTrue(iterator.hasNext());
+        assertEquals("third", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    void elementIteratorHasNextDoesNotAdvance() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("only");
+        Iterator<String> iterator = list.iterator();
+
+        assertTrue(iterator.hasNext());
+        assertTrue(iterator.hasNext());
+        assertEquals("only", iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorReturnsNullAndContinuesToNextElement() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast(null);
+        list.addLast("second");
+        Iterator<String> iterator = list.iterator();
+
+        assertTrue(iterator.hasNext());
+        assertNull(iterator.next());
+        assertTrue(iterator.hasNext());
+        assertEquals("second", iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorReturnsDuplicateElements() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("same");
+        list.addLast("same");
+        Iterator<String> iterator = list.iterator();
+
+        assertEquals("same", iterator.next());
+        assertEquals("same", iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorsHaveIndependentPositions() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("first");
+        list.addLast("second");
+        Iterator<String> firstIterator = list.iterator();
+        Iterator<String> secondIterator = list.iterator();
+
+        assertEquals("first", firstIterator.next());
+        assertEquals("second", firstIterator.next());
+        assertFalse(firstIterator.hasNext());
+        assertEquals("first", secondIterator.next());
+        assertEquals("second", secondIterator.next());
+        assertFalse(secondIterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorRemoveBeforeNextThrows() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("only");
+        Iterator<String> iterator = list.iterator();
+
+        assertThrows(IllegalStateException.class, iterator::remove);
+        assertEquals(1, list.size());
+        assertEquals("only", iterator.next());
+    }
+
+    @Test
+    void elementIteratorRemoveDeletesLastReturnedElement() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> first = list.addLast("first");
+        list.addLast("second");
+        Position<String> third = list.addLast("third");
+        Iterator<String> iterator = list.iterator();
+        assertEquals("first", iterator.next());
+        assertEquals("second", iterator.next());
+
+        iterator.remove();
+
+        assertEquals(2, list.size());
+        assertSame(first, list.first());
+        assertSame(third, list.after(first));
+        assertSame(first, list.before(third));
+        assertSame(third, list.last());
+        assertEquals("third", iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorRemoveTwiceWithoutNextThrows() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("first");
+        list.addLast("second");
+        Iterator<String> iterator = list.iterator();
+        assertEquals("first", iterator.next());
+        iterator.remove();
+
+        assertThrows(IllegalStateException.class, iterator::remove);
+        assertEquals(1, list.size());
+        assertEquals("second", iterator.next());
+    }
+
+    @Test
+    void elementIteratorCanRemoveAgainAfterNext() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        list.addLast("first");
+        list.addLast("second");
+        Iterator<String> iterator = list.iterator();
+
+        assertEquals("first", iterator.next());
+        iterator.remove();
+        assertEquals("second", iterator.next());
+        iterator.remove();
+
+        assertTrue(list.isEmpty());
+        assertNull(list.first());
+        assertNull(list.last());
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void elementIteratorRemoveAtAnyIndexPreservesOrderAndContinues(int index) {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        List<String> elements = List.of("first", "second", "third");
+        List<Position<String>> positions = List.of(
+                list.addLast("first"), list.addLast("second"), list.addLast("third"));
+        Iterator<String> iterator = list.iterator();
+        for (int i = 0; i <= index; i++) {
+            assertEquals(elements.get(i), iterator.next());
+        }
+        assertEquals(index < 2, iterator.hasNext());
+
+        iterator.remove();
+
+        assertEquals(2, list.size());
+        assertThrows(IllegalStateException.class, positions.get(index)::getElement);
+        assertThrows(IllegalStateException.class, iterator::remove);
+        List<String> expectedRemaining = new ArrayList<>(elements);
+        expectedRemaining.remove(index);
+        List<String> actualRemaining = new ArrayList<>();
+        list.iterator().forEachRemaining(actualRemaining::add);
+        assertEquals(expectedRemaining, actualRemaining);
+        assertNull(list.before(list.first()));
+        assertSame(list.last(), list.after(list.first()));
+        assertSame(list.first(), list.before(list.last()));
+        assertNull(list.after(list.last()));
+        for (int i = index + 1; i < elements.size(); i++) {
+            assertTrue(iterator.hasNext());
+            assertEquals(elements.get(i), iterator.next());
+        }
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+    }
+
+    @Test
+    void elementIteratorCanRemoveNullElementAndContinue() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> nullPosition = list.addLast(null);
+        Position<String> remaining = list.addLast("remaining");
+        Iterator<String> iterator = list.iterator();
+        assertNull(iterator.next());
+
+        iterator.remove();
+
+        assertEquals(1, list.size());
+        assertSame(remaining, list.first());
+        assertSame(remaining, list.last());
+        assertThrows(IllegalStateException.class, nullPosition::getElement);
+        assertThrows(IllegalStateException.class, iterator::remove);
+        assertEquals("remaining", iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorRemovesLastReturnedDuplicateByPosition() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> first = list.addLast("same");
+        Position<String> second = list.addLast("same");
+        Iterator<String> iterator = list.iterator();
+        assertEquals("same", iterator.next());
+        assertEquals("same", iterator.next());
+
+        iterator.remove();
+
+        assertEquals(1, list.size());
+        assertSame(first, list.first());
+        assertSame(first, list.last());
+        assertEquals("same", first.getElement());
+        assertThrows(IllegalStateException.class, second::getElement);
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void elementIteratorCanRemoveOnlyElementAfterNextThrowsOnExhaustion() {
+        LinkedPositionalList<String> list = new LinkedPositionalList<>();
+        Position<String> only = list.addLast("only");
+        Iterator<String> iterator = list.iterator();
+        assertEquals("only", iterator.next());
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertThrows(NoSuchElementException.class, iterator::next);
+
+        iterator.remove();
+
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        assertNull(list.first());
+        assertNull(list.last());
+        assertThrows(IllegalStateException.class, only::getElement);
+        assertFalse(iterator.hasNext());
+        assertThrows(NoSuchElementException.class, iterator::next);
+        assertThrows(IllegalStateException.class, iterator::remove);
+    }
 }
