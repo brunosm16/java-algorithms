@@ -1105,4 +1105,212 @@ class LinkedPositionalListTest {
         assertThrows(NoSuchElementException.class, iterator::next);
         assertThrows(IllegalStateException.class, iterator::remove);
     }
+
+    @Test
+    void insertionSortIntegerLeavesEmptyListEmpty() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+
+        list.insertionSortInteger(list);
+        assertEquals(0, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerLeavesSingleElementUnchanged() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(42);
+
+        list.insertionSortInteger(list);
+
+        assertEquals(42, list.first().getElement());
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerLeavesSortedPairUnchanged() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(1);
+        list.addLast(2);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(1, iterator.next());
+        assertEquals(2, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerSortsReversedPair() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(2);
+        list.addLast(1);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(1, iterator.next());
+        assertEquals(2, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerLeavesSortedListUnchanged() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(-3);
+        list.addLast(0);
+        list.addLast(2);
+        list.addLast(7);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(-3, iterator.next());
+        assertEquals(0, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(7, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(4, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerSortsReversedList() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(4);
+        list.addLast(3);
+        list.addLast(2);
+        list.addLast(1);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(1, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(3, iterator.next());
+        assertEquals(4, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(4, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerMovesElementIntoMiddle() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(1);
+        list.addLast(3);
+        list.addLast(2);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(1, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(3, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerSortsUnorderedList() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(4);
+        list.addLast(1);
+        list.addLast(3);
+        list.addLast(2);
+        list.addLast(5);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(1, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(3, iterator.next());
+        assertEquals(4, iterator.next());
+        assertEquals(5, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(5, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerLeavesEqualElementsUnchanged() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(7);
+        list.addLast(7);
+        list.addLast(7);
+        list.addLast(7);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(7, iterator.next());
+        assertEquals(7, iterator.next());
+        assertEquals(7, iterator.next());
+        assertEquals(7, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(4, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerSortsDuplicateValues() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(2);
+        list.addLast(3);
+        list.addLast(2);
+        list.addLast(1);
+        list.addLast(3);
+        list.addLast(1);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(1, iterator.next());
+        assertEquals(1, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(3, iterator.next());
+        assertEquals(3, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(6, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerSortsNegativeValuesAndZero() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(0);
+        list.addLast(-1);
+        list.addLast(3);
+        list.addLast(-5);
+        list.addLast(2);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(-5, iterator.next());
+        assertEquals(-1, iterator.next());
+        assertEquals(0, iterator.next());
+        assertEquals(2, iterator.next());
+        assertEquals(3, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(5, list.size());
+    }
+
+    @Test
+    void insertionSortIntegerSortsIntegerLimits() {
+        LinkedPositionalList<Integer> list = new LinkedPositionalList<>();
+        list.addLast(0);
+        list.addLast(Integer.MAX_VALUE);
+        list.addLast(Integer.MIN_VALUE);
+        list.addLast(-1);
+
+        list.insertionSortInteger(list);
+
+        Iterator<Integer> iterator = list.iterator();
+        assertEquals(Integer.MIN_VALUE, iterator.next());
+        assertEquals(-1, iterator.next());
+        assertEquals(0, iterator.next());
+        assertEquals(Integer.MAX_VALUE, iterator.next());
+        assertFalse(iterator.hasNext());
+        assertEquals(4, list.size());
+    }
+
 }

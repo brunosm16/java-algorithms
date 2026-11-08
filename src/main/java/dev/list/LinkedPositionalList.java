@@ -193,7 +193,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
         @Override
         public Position<E> next() throws NoSuchElementException {
-            if(cursor == null) {
+            if (cursor == null) {
                 throw new NoSuchElementException("List has no next element available");
             }
 
@@ -204,7 +204,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         }
 
         public void remove() throws IllegalStateException {
-            if(latest == null) {
+            if (latest == null) {
                 throw new IllegalStateException("No element available to be removed");
             }
 
@@ -247,5 +247,28 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
 
     public Iterator<E> iterator() {
         return new ElementIterator();
+    }
+
+    public void insertionSortInteger(LinkedPositionalList<Integer> list) {
+        Position<Integer> marker = list.first();
+
+        while (marker != list.last()) {
+            Position<Integer> pivot = list.after(marker);
+
+            Integer pivotEl = pivot.getElement();
+
+            if (pivotEl > marker.getElement()) {
+                marker = pivot;
+            } else {
+                Position<Integer> walk = list.first();
+
+                while (walk != list.first() && list.before(walk).getElement() > pivotEl) {
+                    walk = list.before(walk);
+                }
+
+                list.remove(pivot);
+                list.addBefore(walk, pivotEl);
+            }
+        }
     }
 }
