@@ -22,4 +22,17 @@ public class FavoritesList<E> {
             count++;
         }
     }
+
+    PositionalList<Item<E>> list = new LinkedPositionalList<>();
+
+    public FavoritesList() {
+    }
+
+    protected E value(Position<Item<E>> p) {
+        return p.getElement().getValue();
+    }
+
+    protected int count(Position<Item<E>> p) {
+        return p.getElement().getCount();
+    }
 }
