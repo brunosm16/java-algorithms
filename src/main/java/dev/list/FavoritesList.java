@@ -59,4 +59,14 @@ public class FavoritesList<E> {
             list.addBefore(walk, list.remove(p));
         }
     }
+
+    public int size() {
+        return this.list.size();
+    }
+
+    public boolean isEmpty() {
+        return this.list.isEmpty();
+    }
+
+
 }

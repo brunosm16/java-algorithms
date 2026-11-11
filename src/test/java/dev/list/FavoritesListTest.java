@@ -2,6 +2,7 @@ package dev.list;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -377,5 +378,91 @@ class FavoritesListTest {
         assertSame(middle, favorites.list.after(favorites.list.after(first)));
         assertSame(middle, favorites.list.last());
         assertEquals(3, favorites.list.size());
+    }
+
+    @Test
+    void sizeReturnsZeroForEmptyList() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+
+        assertEquals(0, favorites.size());
+    }
+
+    @Test
+    void sizeReturnsOneForSingleItem() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.list.addLast(new FavoritesList.Item<>("only"));
+
+        assertEquals(1, favorites.size());
+    }
+
+    @Test
+    void sizeReturnsNumberOfItems() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.list.addLast(new FavoritesList.Item<>("first"));
+        favorites.list.addLast(new FavoritesList.Item<>("middle"));
+        favorites.list.addLast(new FavoritesList.Item<>("last"));
+
+        assertEquals(3, favorites.size());
+    }
+
+    @Test
+    void sizeDecreasesAfterRemovingItem() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        Position<FavoritesList.Item<String>> first =
+                favorites.list.addLast(new FavoritesList.Item<>("first"));
+        favorites.list.addLast(new FavoritesList.Item<>("last"));
+
+        favorites.list.remove(first);
+
+        assertEquals(1, favorites.size());
+    }
+
+    @Test
+    void sizeReturnsZeroAfterRemovingLastItem() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        Position<FavoritesList.Item<String>> only =
+                favorites.list.addLast(new FavoritesList.Item<>("only"));
+
+        favorites.list.remove(only);
+
+        assertEquals(0, favorites.size());
+    }
+
+    @Test
+    void isEmptyReturnsTrueForNewList() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+
+        assertTrue(favorites.isEmpty());
+    }
+
+    @Test
+    void isEmptyReturnsFalseForSingleItem() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.list.addLast(new FavoritesList.Item<>("only"));
+
+        assertFalse(favorites.isEmpty());
+    }
+
+    @Test
+    void isEmptyReturnsFalseWhenItemsRemainAfterRemoval() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        Position<FavoritesList.Item<String>> first =
+                favorites.list.addLast(new FavoritesList.Item<>("first"));
+        favorites.list.addLast(new FavoritesList.Item<>("last"));
+
+        favorites.list.remove(first);
+
+        assertFalse(favorites.isEmpty());
+    }
+
+    @Test
+    void isEmptyReturnsTrueAfterRemovingLastItem() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        Position<FavoritesList.Item<String>> only =
+                favorites.list.addLast(new FavoritesList.Item<>("only"));
+
+        favorites.list.remove(only);
+
+        assertTrue(favorites.isEmpty());
     }
 }
