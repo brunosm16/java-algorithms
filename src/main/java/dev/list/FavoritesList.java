@@ -1,5 +1,7 @@
 package dev.list;
 
+import java.util.Iterator;
+
 public class FavoritesList<E> {
     protected static class Item<E> {
         private int count = 0;
@@ -23,7 +25,7 @@ public class FavoritesList<E> {
         }
     }
 
-    PositionalList<Item<E>> list = new LinkedPositionalList<>();
+    LinkedPositionalList<Item<E>> list = new LinkedPositionalList<>();
 
     public FavoritesList() {
     }
@@ -77,5 +79,21 @@ public class FavoritesList<E> {
 
         p.getElement().increment();
         movePositionByCount(p);
+    }
+
+    public Iterable<E> getFavorites(int k) {
+        if(k < 0 || k > size()) {
+            throw new IllegalArgumentException("Invalid k range");
+        }
+
+        PositionalList<E> result = new LinkedPositionalList<>();
+
+        Iterator<Item<E>> iterator = list.iterator();
+
+        for(int i = 0; i < k; i++) {
+            result.addLast(iterator.next().getValue());
+        }
+
+        return result;
     }
 }

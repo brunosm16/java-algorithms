@@ -1,10 +1,14 @@
 package dev.list;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.Iterator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FavoritesListTest {
@@ -575,5 +579,145 @@ class FavoritesListTest {
         assertEquals(2, favorites.count(middle));
         assertEquals("lowest", favorites.value(favorites.list.last()));
         assertEquals(1, favorites.count(favorites.list.last()));
+    }
+
+    @Test
+    void getFavoritesRejectsNegativeCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> favorites.getFavorites(-1));
+    }
+
+    @Test
+    void getFavoritesRejectsCountGreaterThanSize() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("only");
+
+        assertThrows(IllegalArgumentException.class, () -> favorites.getFavorites(2));
+    }
+
+    @Test
+    void getFavoritesRejectsPositiveCountOnEmptyList() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+
+        assertThrows(IllegalArgumentException.class, () -> favorites.getFavorites(1));
+    }
+
+    @Test
+    void getFavoritesReturnsEmptyIterableForZeroOnEmptyList() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+
+        Iterable<String> result = favorites.getFavorites(0);
+
+        assertFalse(result.iterator().hasNext());
+    }
+
+    @Test
+    void getFavoritesReturnsEmptyIterableForZeroOnPopulatedList() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("only");
+
+        Iterable<String> result = favorites.getFavorites(0);
+
+        assertFalse(result.iterator().hasNext());
+    }
+
+    @Test
+    void getFavoritesReturnsOnlyItem() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("only");
+
+        Iterator<String> result = favorites.getFavorites(1).iterator();
+
+        assertTrue(result.hasNext());
+        assertEquals("only", result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    void getFavoritesReturnsRequestedNumberOfMostAccessedItems() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("least");
+        favorites.access("second");
+        favorites.access("second");
+        favorites.access("most");
+        favorites.access("most");
+        favorites.access("most");
+
+        Iterator<String> result = favorites.getFavorites(2).iterator();
+
+        assertEquals("most", result.next());
+        assertEquals("second", result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    void getFavoritesReturnsAllItemsInDescendingCountOrder() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("least");
+        favorites.access("second");
+        favorites.access("second");
+        favorites.access("most");
+        favorites.access("most");
+        favorites.access("most");
+
+        Iterator<String> result = favorites.getFavorites(3).iterator();
+
+        assertEquals("most", result.next());
+        assertEquals("second", result.next());
+        assertEquals("least", result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    void getFavoritesPreservesOrderForEqualCounts() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("first");
+        favorites.access("second");
+        favorites.access("third");
+
+        Iterator<String> result = favorites.getFavorites(2).iterator();
+
+        assertEquals("first", result.next());
+        assertEquals("second", result.next());
+        assertFalse(result.hasNext());
+    }
+
+    @Test
+    void getFavoritesLeavesOriginalItemsAndCountsUnchanged() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("popular");
+        favorites.access("popular");
+        favorites.access("other");
+        Position<FavoritesList.Item<String>> first = favorites.list.first();
+        Position<FavoritesList.Item<String>> last = favorites.list.last();
+
+        Iterator<String> result = favorites.getFavorites(1).iterator();
+
+        assertEquals("popular", result.next());
+        assertFalse(result.hasNext());
+        assertEquals(2, favorites.size());
+        assertSame(first, favorites.list.first());
+        assertSame(last, favorites.list.last());
+        assertEquals("popular", favorites.value(first));
+        assertEquals(2, favorites.count(first));
+        assertEquals("other", favorites.value(last));
+        assertEquals(1, favorites.count(last));
+    }
+
+    @Test
+    void getFavoritesResultCanBeIteratedMoreThanOnce() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("only");
+
+        Iterable<String> result = favorites.getFavorites(1);
+
+        Iterator<String> firstIterator = result.iterator();
+        assertEquals("only", firstIterator.next());
+        assertFalse(firstIterator.hasNext());
+
+        Iterator<String> secondIterator = result.iterator();
+        assertEquals("only", secondIterator.next());
+        assertFalse(secondIterator.hasNext());
     }
 }

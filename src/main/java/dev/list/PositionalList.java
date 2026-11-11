@@ -1,6 +1,6 @@
 package dev.list;
 
-public interface PositionalList<E> {
+public interface PositionalList<E> extends Iterable<E> {
     /**
      * Returns the number of elements in the list.
      *

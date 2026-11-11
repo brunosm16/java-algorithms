@@ -245,6 +245,7 @@ public class LinkedPositionalList<E> implements PositionalList<E> {
         return new PositionIterable();
     }
 
+    @Override
     public Iterator<E> iterator() {
         return new ElementIterator();
     }
