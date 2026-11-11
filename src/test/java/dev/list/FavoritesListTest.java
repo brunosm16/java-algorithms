@@ -465,4 +465,115 @@ class FavoritesListTest {
 
         assertTrue(favorites.isEmpty());
     }
+
+    @Test
+    void accessAddsFirstItemWithCountOne() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+
+        favorites.access("first");
+
+        assertEquals(1, favorites.size());
+        assertFalse(favorites.isEmpty());
+        assertEquals("first", favorites.value(favorites.list.first()));
+        assertEquals(1, favorites.count(favorites.list.first()));
+        assertSame(favorites.list.first(), favorites.list.last());
+    }
+
+    @Test
+    void accessIncrementsExistingItemWithoutAddingDuplicate() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("same");
+        FavoritesList.Item<String> item = favorites.list.first().getElement();
+
+        favorites.access("same");
+
+        assertEquals(1, favorites.size());
+        assertSame(item, favorites.list.first().getElement());
+        assertEquals(2, item.getCount());
+    }
+
+    @Test
+    void accessAddsNewItemAfterExistingItemWithEqualCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("first");
+
+        favorites.access("second");
+
+        assertEquals(2, favorites.size());
+        assertEquals("first", favorites.value(favorites.list.first()));
+        assertEquals("second", favorites.value(favorites.list.last()));
+        assertEquals(1, favorites.count(favorites.list.first()));
+        assertEquals(1, favorites.count(favorites.list.last()));
+    }
+
+    @Test
+    void accessMovesItemToFrontWhenItsCountBecomesHighest() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("first");
+        favorites.access("middle");
+        favorites.access("last");
+        FavoritesList.Item<String> lastItem = favorites.list.last().getElement();
+
+        favorites.access("last");
+
+        assertEquals(3, favorites.size());
+        assertSame(lastItem, favorites.list.first().getElement());
+        assertEquals(2, favorites.count(favorites.list.first()));
+        assertEquals("first", favorites.value(favorites.list.after(favorites.list.first())));
+        assertEquals("middle", favorites.value(favorites.list.last()));
+    }
+
+    @Test
+    void accessKeepsItemBehindHigherCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("popular");
+        favorites.access("popular");
+        favorites.access("popular");
+        favorites.access("other");
+
+        favorites.access("other");
+
+        assertEquals(2, favorites.size());
+        assertEquals("popular", favorites.value(favorites.list.first()));
+        assertEquals(3, favorites.count(favorites.list.first()));
+        assertEquals("other", favorites.value(favorites.list.last()));
+        assertEquals(2, favorites.count(favorites.list.last()));
+    }
+
+    @Test
+    void accessKeepsItemBehindEqualCountAfterIncrement() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("first");
+        favorites.access("first");
+        favorites.access("second");
+
+        favorites.access("second");
+
+        assertEquals(2, favorites.size());
+        assertEquals("first", favorites.value(favorites.list.first()));
+        assertEquals("second", favorites.value(favorites.list.last()));
+        assertEquals(2, favorites.count(favorites.list.first()));
+        assertEquals(2, favorites.count(favorites.list.last()));
+    }
+
+    @Test
+    void accessMovesItemToMiddleBehindHigherCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        favorites.access("highest");
+        favorites.access("highest");
+        favorites.access("highest");
+        favorites.access("lowest");
+        favorites.access("moving");
+
+        favorites.access("moving");
+
+        Position<FavoritesList.Item<String>> middle = favorites.list.after(favorites.list.first());
+        assertEquals(3, favorites.size());
+        assertEquals("highest", favorites.value(favorites.list.first()));
+        assertEquals(3, favorites.count(favorites.list.first()));
+        assertEquals("moving", favorites.value(middle));
+        assertEquals(2, favorites.count(middle));
+        assertEquals("lowest", favorites.value(favorites.list.last()));
+        assertEquals(1, favorites.count(favorites.list.last()));
+    }
 }

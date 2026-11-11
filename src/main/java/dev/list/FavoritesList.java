@@ -68,5 +68,14 @@ public class FavoritesList<E> {
         return this.list.isEmpty();
     }
 
+    public void access(E el) {
+        Position<Item<E>> p = findPosition(el);
 
+        if(p == null) {
+            p = this.list.addLast(new Item<>(el));
+        }
+
+        p.getElement().increment();
+        movePositionByCount(p);
+    }
 }
