@@ -45,4 +45,18 @@ public class FavoritesList<E> {
 
         return walk;
     }
+
+    protected void movePositionByCount(Position<Item<E>> p) {
+        Position<Item<E>> walk = p;
+
+        int pCount = count(p);
+
+        while(walk != list.first() && count(list.before(walk)) < pCount) {
+            walk = list.before(walk);
+        }
+
+        if(walk != p) {
+            list.addBefore(walk, list.remove(p));
+        }
+    }
 }

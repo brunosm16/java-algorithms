@@ -225,4 +225,157 @@ class FavoritesListTest {
 
         assertNull(favorites.findPosition("missing"));
     }
+
+    @Test
+    void movePositionByCountLeavesOnlyItemInPlace() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        Position<FavoritesList.Item<String>> only =
+                favorites.list.addLast(new FavoritesList.Item<>("only"));
+
+        favorites.movePositionByCount(only);
+
+        assertSame(only, favorites.list.first());
+        assertSame(only, favorites.list.last());
+        assertEquals(1, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountLeavesFirstItemInPlace() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> firstItem = new FavoritesList.Item<>("first");
+        firstItem.increment();
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(firstItem);
+        Position<FavoritesList.Item<String>> last =
+                favorites.list.addLast(new FavoritesList.Item<>("last"));
+
+        favorites.movePositionByCount(first);
+
+        assertSame(first, favorites.list.first());
+        assertSame(last, favorites.list.after(first));
+        assertSame(last, favorites.list.last());
+        assertEquals(2, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountLeavesItemBehindHigherCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> popular = new FavoritesList.Item<>("popular");
+        popular.increment();
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(popular);
+        Position<FavoritesList.Item<String>> last =
+                favorites.list.addLast(new FavoritesList.Item<>("unaccessed"));
+
+        favorites.movePositionByCount(last);
+
+        assertSame(first, favorites.list.first());
+        assertSame(last, favorites.list.after(first));
+        assertSame(last, favorites.list.last());
+        assertEquals(2, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountLeavesItemBehindEqualCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> firstItem = new FavoritesList.Item<>("first");
+        firstItem.increment();
+        FavoritesList.Item<String> lastItem = new FavoritesList.Item<>("last");
+        lastItem.increment();
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(firstItem);
+        Position<FavoritesList.Item<String>> last = favorites.list.addLast(lastItem);
+
+        favorites.movePositionByCount(last);
+
+        assertSame(first, favorites.list.first());
+        assertSame(last, favorites.list.after(first));
+        assertSame(last, favorites.list.last());
+        assertEquals(2, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountMovesItemAheadOfOneLowerCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> unaccessed = new FavoritesList.Item<>("unaccessed");
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(unaccessed);
+        FavoritesList.Item<String> popular = new FavoritesList.Item<>("popular");
+        popular.increment();
+        Position<FavoritesList.Item<String>> last = favorites.list.addLast(popular);
+
+        favorites.movePositionByCount(last);
+
+        assertSame(popular, favorites.list.first().getElement());
+        assertSame(first, favorites.list.after(favorites.list.first()));
+        assertSame(first, favorites.list.last());
+        assertSame(unaccessed, first.getElement());
+        assertEquals(1, popular.getCount());
+        assertEquals(0, unaccessed.getCount());
+        assertEquals(2, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountMovesItemAheadOfSeveralLowerCounts() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> firstItem = new FavoritesList.Item<>("first");
+        firstItem.increment();
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(firstItem);
+        Position<FavoritesList.Item<String>> middle =
+                favorites.list.addLast(new FavoritesList.Item<>("middle"));
+        FavoritesList.Item<String> popular = new FavoritesList.Item<>("popular");
+        popular.increment();
+        popular.increment();
+        Position<FavoritesList.Item<String>> last = favorites.list.addLast(popular);
+
+        favorites.movePositionByCount(last);
+
+        assertSame(popular, favorites.list.first().getElement());
+        assertSame(first, favorites.list.after(favorites.list.first()));
+        assertSame(middle, favorites.list.after(first));
+        assertSame(middle, favorites.list.last());
+        assertEquals(2, popular.getCount());
+        assertEquals(1, firstItem.getCount());
+        assertEquals(0, favorites.count(middle));
+        assertEquals(3, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountStopsAfterItemWithHigherCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> highest = new FavoritesList.Item<>("highest");
+        highest.increment();
+        highest.increment();
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(highest);
+        Position<FavoritesList.Item<String>> middle =
+                favorites.list.addLast(new FavoritesList.Item<>("unaccessed"));
+        FavoritesList.Item<String> moving = new FavoritesList.Item<>("moving");
+        moving.increment();
+        Position<FavoritesList.Item<String>> last = favorites.list.addLast(moving);
+
+        favorites.movePositionByCount(last);
+
+        assertSame(first, favorites.list.first());
+        assertSame(moving, favorites.list.after(first).getElement());
+        assertSame(middle, favorites.list.after(favorites.list.after(first)));
+        assertSame(middle, favorites.list.last());
+        assertEquals(3, favorites.list.size());
+    }
+
+    @Test
+    void movePositionByCountStopsAfterItemWithEqualCount() {
+        FavoritesList<String> favorites = new FavoritesList<>();
+        FavoritesList.Item<String> equal = new FavoritesList.Item<>("equal");
+        equal.increment();
+        Position<FavoritesList.Item<String>> first = favorites.list.addLast(equal);
+        Position<FavoritesList.Item<String>> middle =
+                favorites.list.addLast(new FavoritesList.Item<>("unaccessed"));
+        FavoritesList.Item<String> moving = new FavoritesList.Item<>("moving");
+        moving.increment();
+        Position<FavoritesList.Item<String>> last = favorites.list.addLast(moving);
+
+        favorites.movePositionByCount(last);
+
+        assertSame(first, favorites.list.first());
+        assertSame(moving, favorites.list.after(first).getElement());
+        assertSame(middle, favorites.list.after(favorites.list.after(first)));
+        assertSame(middle, favorites.list.last());
+        assertEquals(3, favorites.list.size());
+    }
 }
